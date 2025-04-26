@@ -1,19 +1,20 @@
 services:
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    restart: unless-stopped
-    ports:
-      - 8090:8080
-    environment:
-      TZ: "Asia/Seoul"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      #- /var/lib/docker/:/var/lib/docker:ro
-      - /var/snap/docker/common/var-lib-docker:/var/snap/docker/common/var-lib-docker:ro
-      - /dev/disk/:/dev/disk:ro
+  # cAdvisor is a container that provides insights into resource usage and performance characteristics of running containers.
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:latest
+  #   container_name: cadvisor
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8090:8080 # Exposes cAdvisor's web interface on port 8090
+  #   environment:
+  #     TZ: "Asia/Seoul" # Sets the timezone to Asia/Seoul
+  #   volumes:
+  #     - /:/rootfs:ro # Mounts the root filesystem as read-only
+  #     - /var/run:/var/run:rw # Mounts the /var/run directory with read-write permissions
+  #     - /sys:/sys:ro # Mounts the /sys directory as read-only
+  #     #- /var/lib/docker/:/var/lib/docker:ro # Uncomment if using default Docker directory
+  #     - /var/snap/docker/common/var-lib-docker:/var/snap/docker/common/var-lib-docker:ro # Mounts Docker's data directory as read-only
+  #     - /dev/disk/:/dev/disk:ro # Mounts the /dev/disk directory as read-only
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -28,59 +29,63 @@ services:
     volumes:
       - $HOME/docker-data/grafana/data:/var/lib/grafana
       - $HOME/docker-data/grafana:/etc/grafana/provisioning/datasources
-  jaeger: 
-    image: "jaegertracing/all-in-one:1.63.0"
-    container_name: jaeger
-    restart: unless-stopped
-    links:
-      - opensearch
-    environment:
-      - TZ=Asia/Seoul
-      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
-      - COLLECTOR_OTLP_ENABLED=true
-      - SPAN_STORAGE_TYPE=opensearch
-      - ES_TAGS_AS_FIELDS_ALL=true
-      - ES_USERNAME=admin
-      - ES_PASSWORD=${OPENSEARCH_PASSWORD}
-      - ES_TLS_SKIP_HOST_VERIFY=true
-    command: [
-      "--es.server-urls=http://opensearch-node1:9200",
-      "--es.tls.enabled=true",
-    ]
-    ports:
-      - "6831:6831/udp" # jaeger-agent
-      - "6832:6832/udp" # jaeger-agent Node.js
-      - "5778:5778" # for JAEGER_AGENT_PORT
-      - "16686:16686" # Web UI
-      - "4417:4317" # for OTLP HTTP gRPC
-      - "4418:4318" # for OTLP HTTP
-      - "14250:14250" # for OTLP HTTP model.proto
-      - "14268:14268" # for OTLP gRPC
-      - "14269:14269" # for OTLP gRPC
-      - "9411:9411" # for Zipkin
-  keyclock:
-    image: bitnami/keycloak
-    restart: always
-    ports:
-      - 8080:8080
-    environment:
-      TZ: "Asia/Seoul"  
-      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KEYCLOAK_DATABASE_HOST: postgres
-      KEYCLOAK_DATABASE_PORT: 5432
-      KEYCLOAK_DATABASE_NAME: ${POSTGRES_DB}
-      KEYCLOAK_DATABASE_USER: ${POSTGRES_USER}
-      KEYCLOAK_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-    depends_on:
-      - postgres
+  # jaeger: 
+  #   image: "jaegertracing/all-in-one:1.63.0"
+  #   container_name: jaeger
+  #   restart: unless-stopped
+  #   links:
+  #     - opensearch
+  #   environment:
+  #     - TZ=Asia/Seoul
+  #     - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+  #     - COLLECTOR_OTLP_ENABLED=true
+  #     - SPAN_STORAGE_TYPE=opensearch
+  #     - ES_TAGS_AS_FIELDS_ALL=true
+  #     - ES_USERNAME=admin
+  #     - ES_PASSWORD=${OPENSEARCH_PASSWORD}
+  #     - ES_TLS_SKIP_HOST_VERIFY=true
+  #   command: [
+  #     "--es.server-urls=http://opensearch-node1:9200",
+  #     "--es.tls.enabled=true",
+  #   ]
+  #   ports:
+  #     - "6831:6831/udp" # jaeger-agent
+  #     - "6832:6832/udp" # jaeger-agent Node.js
+  #     - "5778:5778" # for JAEGER_AGENT_PORT
+  #     - "16686:16686" # Web UI
+  #     - "4417:4317" # for OTLP HTTP gRPC
+  #     - "4418:4318" # for OTLP HTTP
+  #     - "14250:14250" # for OTLP HTTP model.proto
+  #     - "14268:14268" # for OTLP gRPC
+  #     - "14269:14269" # for OTLP gRPC
+  #     - "9411:9411" # for Zipkin
+  # keyclock:
+  #   image: bitnami/keycloak
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     TZ: "Asia/Seoul"  
+  #     KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN}
+  #     KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+  #     KEYCLOAK_DATABASE_HOST: postgres
+  #     KEYCLOAK_DATABASE_PORT: 5432
+  #     KEYCLOAK_DATABASE_NAME: ${POSTGRES_DB}
+  #     KEYCLOAK_DATABASE_USER: ${POSTGRES_USER}
+  #     KEYCLOAK_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+  #   depends_on:
+  #     - postgres
   loki:
     image: grafana/loki:latest
     container_name: loki
     restart: unless-stopped
     environment:
-      TZ: "Asia/Seoul"
-    command: -config.file=/etc/loki/local-config.yaml
+      - TZ=Asia/Seoul
+      - JAEGER_AGENT_HOST=tempo
+      - JAEGER_ENDPOINT=http://tempo:14268/api/traces # send traces to Tempo
+      - JAEGER_SAMPLER_TYPE=const
+      - JAEGER_SAMPLER_PARAM=1
+    command: -config.file=/etc/loki/loky.yaml
     user: ":"
     ports:
        - 3100:3100
@@ -92,99 +97,118 @@ services:
         retries: 10
         start_period: 10s
     volumes:
+      - ./loki/loki.yaml:/etc/loki/loki.yaml
       - $HOME/docker-data/loki/data:/loki
-  mysql:
-    image: mysql:lts
-    container_name: mysql
+  # mysql:
+  #   image: mysql:lts
+  #   container_name: mysql
+  #   restart: unless-stopped
+  #   ports:
+  #     - 3306:3306
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #     MYSQL_DATABASE: test-db
+  #     MYSQL_ROOT_PASSWORD: "1234"
+  #     MYSQL_ROOT_HOST: '%'
+  #   command:
+  #     - --character-set-server=utf8mb4
+  #     - --collation-server=utf8mb4_unicode_ci
+  #   volumes:
+  #     - $HOME/docker-compose/mysql/mysql.conf:/etc/mysql/my.cnf
+  #     - $HOME/docker-data/mysql/data:/var/lib/mysql
+  # node-exporter:
+  #   image: bitnami/node-exporter:latest
+  #   container_name: node-exporter
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9100:9100
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  # opensearch:
+  #   image: opensearchproject/opensearch:latest
+  #   container_name: opensearch-node1
+  #   restart: unless-stopped
+  #   user: "1000:1000" # sudo chown -R username:group directory
+  #   #user: root
+  #   ports:
+  #     - 9200:9200 # REST API
+  #     - 9600:9600 # Performance Analyzer
+  #   environment:
+  #     - TZ=Asia/Seoul
+  #     - discovery.type=single-node
+  #     - node.name=opensearch-node1 # Name the node that will run in this container
+  #     - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+  #     - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+  #     - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD} # Set the initial password for the admin user
+  #     - DISABLE_SECURITY_PLUGIN=true
+  #   ulimits:
+  #     memlock:
+  #       soft: -1 # Set memlock to unlimited (no soft or hard limit)
+  #       hard: -1
+  #     nofile:
+  #       soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+  #       hard: 65536
+  #   volumes:
+  #     - $HOME/docker-data/opensearch/opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+  # opensearch-dashboards:
+  #   image: opensearchproject/opensearch-dashboards:latest # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
+  #   container_name: opensearch-dashboards
+  #   restart: unless-stopped
+  #   ports:
+  #     - 5601:5601 # Map host port 5601 to container port 5601
+  #   expose:
+  #     - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #     OPENSEARCH_HOSTS: '["http://opensearch-node1:9200"]' # Define the OpenSearch nodes that OpenSearch Dashboards will query
+  #     DISABLE_SECURITY_DASHBOARDS_PLUGIN: true # disables security dashboards plugin in OpenSearch Dashboards
+  #   volumes:
+  #     - ./opensearch_dashboards/custom-opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+  #   networks:
+  #     - default
+  #   depends_on:
+  #     - opensearch
+  otel-collector:
+    image: otel/opentelemetry-collector:0.123.0
+    container_name: otel-collector
     restart: unless-stopped
-    ports:
-      - 3306:3306
-    environment:
-      TZ: "Asia/Seoul"
-      MYSQL_DATABASE: test-db
-      MYSQL_ROOT_PASSWORD: "1234"
-      MYSQL_ROOT_HOST: '%'
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
+    command: [ "--config=/etc/otel-collector.yaml" ]
     volumes:
-      - $HOME/docker-compose/mysql/mysql.conf:/etc/mysql/my.cnf
-      - $HOME/docker-data/mysql/data:/var/lib/mysql
-  node-exporter:
-    image: bitnami/node-exporter:latest
-    container_name: node-exporter
-    restart: unless-stopped
+      - ./otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
     ports:
-      - 9100:9100
-    environment:
-      TZ: "Asia/Seoul"
-  opensearch:
-    image: opensearchproject/opensearch:latest
-    container_name: opensearch-node1
-    restart: unless-stopped
-    user: "1000:1000" # sudo chown -R username:group directory
-    #user: root
-    ports:
-      - 9200:9200 # REST API
-      - 9600:9600 # Performance Analyzer
-    environment:
-      - TZ=Asia/Seoul
-      - discovery.type=single-node
-      - node.name=opensearch-node1 # Name the node that will run in this container
-      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD} # Set the initial password for the admin user
-      - DISABLE_SECURITY_PLUGIN=true
-    ulimits:
-      memlock:
-        soft: -1 # Set memlock to unlimited (no soft or hard limit)
-        hard: -1
-      nofile:
-        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
-        hard: 65536
-    volumes:
-      - $HOME/docker-data/opensearch/opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:latest # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
-    container_name: opensearch-dashboards
-    restart: unless-stopped
-    ports:
-      - 5601:5601 # Map host port 5601 to container port 5601
-    expose:
-      - "5601" # Expose port 5601 for web access to OpenSearch Dashboards
-    environment:
-      TZ: "Asia/Seoul"
-      OPENSEARCH_HOSTS: '["http://opensearch-node1:9200"]' # Define the OpenSearch nodes that OpenSearch Dashboards will query
-      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true # disables security dashboards plugin in OpenSearch Dashboards
-    volumes:
-      - ./opensearch_dashboards/custom-opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
-    networks:
-      - default
+      - "1888:1888"   # pprof extension
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "8889:8889"   # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "55679:55679" # zpages extension
     depends_on:
-      - opensearch
-  portainer:
-    image: portainer/portainer-ce:alpine
-    container_name: portainer
-    restart: unless-stopped
-    ports:
-      - 9000:9000
-    environment:
-      TZ: "Asia/Seoul"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - $HOME/docker-data/portainer/data:/data
-  postgres:
-    image: postgres:16.2
-    container_name: postgres
-    ports:
-      - 5432:5432
-    volumes:
-      - $HOME/docker-data/postgres_data:/var/lib/postgresql/data
-    environment:
-      TZ: "Asia/Seoul"
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      - tempo
+      - prometheus
+  # portainer:
+  #   image: portainer/portainer-ce:alpine
+  #   container_name: portainer
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9000:9000
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - $HOME/docker-data/portainer/data:/data
+  # postgres:
+  #   image: postgres:16.2
+  #   container_name: postgres
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - $HOME/docker-data/postgres_data:/var/lib/postgresql/data
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   prometheus:
     image: bitnami/prometheus:latest
     container_name: prometheus
@@ -209,82 +233,82 @@ services:
       options:
         max-size: "8m"
         max-file: "10"
-  promtail:
-    image: grafana/promtail:latest
-    container_name: promtail
-    restart: unless-stopped
-    environment:
-      TZ: "Asia/Seoul"
-    ports:
-      - 9080:9080
-    command:
-      - '-config.expand-env=true'
-      - '-config.file=/etc/promtail/config.yml'
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./promtail:/etc/promtail
-      - $HOME/docker-data/promtail/volume:/promtail
-      #- ./spring-sample/logs:/logs
+  # promtail:
+  #   image: grafana/promtail:latest
+  #   container_name: promtail
+  #   restart: unless-stopped
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #   ports:
+  #     - 9080:9080
+  #   command:
+  #     - '-config.expand-env=true'
+  #     - '-config.file=/etc/promtail/config.yml'
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./promtail:/etc/promtail
+  #     - $HOME/docker-data/promtail/volume:/promtail
+  #     #- ./spring-sample/logs:/logs
   #   networks:
   #     - default
   #     - compose_network
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    hostname: 'mabbit'
-    restart: unless-stopped
-    ports:
-      - 5672:5672
-      - 15672:15672
-      # Prometheus metrics: HTTP (non-TLS) port 15692
-      - 15692:15692
-    environment:
-      TZ: "Asia/Seoul"
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: 1234
-    volumes:
-      #- $HOME/docker-compose/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - $HOME/docker-data/rabbitmq/:/var/lib/rabbitmq/mnesia/
-      - $HOME/docker-data/rabbitmq/:/var/log/rabbitmq/
-  redis:
-    image: redis:latest
-    container_name: redis
-    restart: unless-stopped
-    hostname: redis
-    labels:
-      - "name=redis"
-      - "mode=standalone"
-    ports:
-      - 6379:6379
-      - 6380:6379
-    environment:
-      TZ: "Asia/Seoul"
-    volumes:
-      - $HOME/docker-data/redis/data:/data
-  redis-exporter:
-    image: bitnami/redis-exporter:latest
-    container_name: redis_exporter
-    restart: unless-stopped
-    ports:
-      - 9121:9121
-    command:
-      - '--redis.addr=redis://redis:6379'
-    links:
-      - redis
-    environment:
-      TZ: "Asia/Seoul"
-  seq:
-    image: datalust/seq:latest
-    container_name: seq
-    restart: unless-stopped
-    environment:
-      TZ: "Asia/Seoul"
-      ACCEPT_EULA: Y
-    volumes:
-      - $HOME/docker-data/seq/data:/data
-    ports:
-      - 10000:80
-      - 10001:5341
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   container_name: rabbitmq
+  #   hostname: 'mabbit'
+  #   restart: unless-stopped
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+  #     # Prometheus metrics: HTTP (non-TLS) port 15692
+  #     - 15692:15692
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #     RABBITMQ_DEFAULT_USER: user
+  #     RABBITMQ_DEFAULT_PASS: 1234
+  #   volumes:
+  #     #- $HOME/docker-compose/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+  #     - $HOME/docker-data/rabbitmq/:/var/lib/rabbitmq/mnesia/
+  #     - $HOME/docker-data/rabbitmq/:/var/log/rabbitmq/
+  # redis:
+  #   image: redis:latest
+  #   container_name: redis
+  #   restart: unless-stopped
+  #   hostname: redis
+  #   labels:
+  #     - "name=redis"
+  #     - "mode=standalone"
+  #   ports:
+  #     - 6379:6379
+  #     - 6380:6379
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #   volumes:
+  #     - $HOME/docker-data/redis/data:/data
+  # redis-exporter:
+  #   image: bitnami/redis-exporter:latest
+  #   container_name: redis_exporter
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9121:9121
+  #   command:
+  #     - '--redis.addr=redis://redis:6379'
+  #   links:
+  #     - redis
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  # seq:
+  #   image: datalust/seq:latest
+  #   container_name: seq
+  #   restart: unless-stopped
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #     ACCEPT_EULA: Y
+  #   volumes:
+  #     - $HOME/docker-data/seq/data:/data
+  #   ports:
+  #     - 10000:80
+  #     - 10001:5341
   tempo:
     container_name: tempo
     image: grafana/tempo:latest
@@ -299,10 +323,12 @@ services:
       - ./tempo:/etc/tempo/config
       - $HOME/docker-data/tempo:/var
     ports:
-      - 3200:3200 # tempo
-      - 9095:9095 # tempo grpc
-      - 4317:4317 # otlp grpc
-      - 4318:4318 # otlp http
+      - 14268:14268 # jaeger ingest
+      - 3200:3200   # tempo
+      - 9095:9095   # tempo grpc
+      - 4317:4317   # otlp grpc
+      - 4318:4318   # otlp http
+      - 9411:9411   # zipkin
     restart: always
   # mysql-exporter:
   #   image: bitnami/mysqld-exporter:latest
