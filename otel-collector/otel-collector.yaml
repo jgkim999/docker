@@ -9,7 +9,7 @@ receivers:
             - https://*
 exporters:
   otlp:
-    endpoint: tempo:4319
+    endpoint: jaeger:4417
     tls:
       insecure: true
 

@@ -1,4 +1,13 @@
 services:
+  #otel-demo:
+  #  image: otel-demo
+  #  container_name: otel-demo
+  #  restart: unless-stopped
+  #  ports:
+  #    - 3001:3001
+  #    - 3002:3002
+  #  environment:
+  #    TZ: "Asia/Seoul" # Sets the timezone to Asia/Seoul    
   # cAdvisor is a container that provides insights into resource usage and performance characteristics of running containers.
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -29,14 +38,20 @@ services:
     volumes:
       - $HOME/docker-data/grafana/data:/var/lib/grafana
       - $HOME/docker-data/grafana:/etc/grafana/provisioning/datasources
-  # jaeger: 
-  #   image: "jaegertracing/all-in-one:1.63.0"
-  #   container_name: jaeger
-  #   restart: unless-stopped
+  jaeger: 
+    image: "jaegertracing/jaeger:latest"
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+      - "4417:4317"
+      - "4418:4318"
+    environment:
+      - LOG_LEVEL=debug
+    restart: unless-stopped
   #   links:
   #     - opensearch
-  #   environment:
-  #     - TZ=Asia/Seoul
+  #  environment:
+  #    - TZ=Asia/Seoul
   #     - COLLECTOR_ZIPKIN_HOST_PORT=:9411
   #     - COLLECTOR_OTLP_ENABLED=true
   #     - SPAN_STORAGE_TYPE=opensearch
@@ -99,23 +114,23 @@ services:
     volumes:
       - ./loki/loki.yaml:/etc/loki/loki.yaml
       - $HOME/docker-data/loki/data:/loki
-  # mysql:
-  #   image: mysql:lts
-  #   container_name: mysql
-  #   restart: unless-stopped
-  #   ports:
-  #     - 3306:3306
-  #   environment:
-  #     TZ: "Asia/Seoul"
-  #     MYSQL_DATABASE: test-db
-  #     MYSQL_ROOT_PASSWORD: "1234"
-  #     MYSQL_ROOT_HOST: '%'
-  #   command:
-  #     - --character-set-server=utf8mb4
-  #     - --collation-server=utf8mb4_unicode_ci
-  #   volumes:
-  #     - $HOME/docker-compose/mysql/mysql.conf:/etc/mysql/my.cnf
-  #     - $HOME/docker-data/mysql/data:/var/lib/mysql
+  mysql:
+    image: mysql:lts
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    environment:
+      TZ: "Asia/Seoul"
+      MYSQL_DATABASE: test-db
+      MYSQL_ROOT_PASSWORD: "1234"
+      MYSQL_ROOT_HOST: '%'
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - $HOME/docker-compose/mysql/mysql.conf:/etc/mysql/my.cnf
+      - $HOME/docker-data/mysql/data:/var/lib/mysql
   node-exporter:
     image: bitnami/node-exporter:latest
     container_name: node-exporter
@@ -169,10 +184,12 @@ services:
   #   depends_on:
   #     - opensearch
   otel-collector:
-    image: otel/opentelemetry-collector:0.123.0
+    image: otel/opentelemetry-collector
     container_name: otel-collector
     restart: unless-stopped
     command: [ "--config=/etc/otel-collector.yaml" ]
+    environment:
+      TZ: "Asia/Seoul"
     volumes:
       - ./otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
     ports:
@@ -184,7 +201,7 @@ services:
       - "4318:4318"   # OTLP HTTP receiver
       - "55679:55679" # zpages extension
     depends_on:
-      - tempo
+      - jaeger
       - prometheus
   # portainer:
   #   image: portainer/portainer-ce:alpine
@@ -309,27 +326,27 @@ services:
   #   ports:
   #     - 10000:80
   #     - 10001:5341
-  tempo:
-    container_name: tempo
-    image: grafana/tempo:latest
-    environment:
-      TZ: "Asia/Seoul"
-    command:
-      [
-        "-config.file=/etc/tempo/config/tempo.yml",
-        "--auth.enabled=false"
-      ]
-    volumes:
-      - ./tempo:/etc/tempo/config
-      - $HOME/docker-data/tempo:/var
-    ports:
-      - 14268:14268 # jaeger ingest
-      - 3200:3200   # tempo
-      - 9095:9095   # tempo grpc
-      - 4319:4317   # otlp grpc
-      - 4320:4318   # otlp http
-      - 9411:9411   # zipkin
-    restart: always
+  # tempo:
+  #   container_name: tempo
+  #   image: grafana/tempo:latest
+  #   environment:
+  #     TZ: "Asia/Seoul"
+  #   command:
+  #     [
+  #       "-config.file=/etc/tempo/config/tempo.yml",
+  #       "--auth.enabled=false"
+  #     ]
+  #   volumes:
+  #     - ./tempo:/etc/tempo/config
+  #     - $HOME/docker-data/tempo:/var
+  #   ports:
+  #     - 14268:14268 # jaeger ingest
+  #     - 3200:3200   # tempo
+  #     - 9095:9095   # tempo grpc
+  #     - 4321:4317   # otlp grpc
+  #     - 4320:4318   # otlp http
+  #     - 9411:9411   # zipkin
+  #   restart: always  
   # mysql-exporter:
   #   image: bitnami/mysqld-exporter:latest
   #   container_name: mysql-exporter
