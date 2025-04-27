@@ -9,7 +9,7 @@ receivers:
             - https://*
 exporters:
   otlp:
-    endpoint: jaeger:4417
+    endpoint: jaeger:4317
     tls:
       insecure: true
 
