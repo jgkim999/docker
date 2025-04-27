@@ -9,7 +9,7 @@ receivers:
             - https://*
 exporters:
   otlp:
-    endpoint: tempo:4317
+    endpoint: tempo:4319
     tls:
       insecure: true
 
