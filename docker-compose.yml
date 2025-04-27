@@ -112,7 +112,7 @@ services:
         retries: 10
         start_period: 10s
     volumes:
-      - ./loki/loki.yaml:/etc/loki/loki.yaml
+      - ./loki.yaml:/etc/loki/loki.yaml
       - $HOME/docker-data/loki/data:/loki
   mysql:
     image: mysql:lts
@@ -129,7 +129,7 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     volumes:
-      - $HOME/docker-compose/mysql/mysql.conf:/etc/mysql/my.cnf
+      - ./mysql.conf:/etc/mysql/my.cnf
       - $HOME/docker-data/mysql/data:/var/lib/mysql
   node-exporter:
     image: bitnami/node-exporter:latest
@@ -191,7 +191,7 @@ services:
     environment:
       TZ: "Asia/Seoul"
     volumes:
-      - ./otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
+      - ./otel-collector.yaml:/etc/otel-collector.yaml
     ports:
       - "1888:1888"   # pprof extension
       - "8888:8888"   # Prometheus metrics exposed by the collector
@@ -242,7 +242,7 @@ services:
       - --enable-feature=native-histograms
     volumes:
       - $HOME/docker-data/prometheus/data:/prometheus
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     environment:
       TZ: "Asia/Seoul"
     logging:
