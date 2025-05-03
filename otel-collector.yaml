@@ -19,6 +19,10 @@ exporters:
     endpoint: jaeger:4317
     tls:
       insecure: true
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
+    tls:
+      insecure: true
   prometheus:
     endpoint: 0.0.0.0:9090
   otlphttp:
@@ -28,7 +32,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, otlp]
+      exporters: [debug, otlp, otlphttp/tempo]
     metrics:
       receivers: [otlp]
       processors: [batch]

@@ -54,4 +54,5 @@ storage:
       path: /tmp/tempo/blocks
 
 overrides:
-  metrics_generator_processors: [service-graphs, span-metrics] # enables metrics generator
+  metrics_generator_processors: [service-graphs, span-metrics, 'local-blocks'] # enables metrics generator  
+  
