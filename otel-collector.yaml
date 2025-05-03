@@ -10,20 +10,29 @@ receivers:
             - http://*
             - https://*
 processors:
+  batch:
 extensions:
   health_check: {} 
 exporters:
+  debug:  
   otlp:
     endpoint: jaeger:4317
     tls:
       insecure: true
   prometheus:
     endpoint: 0.0.0.0:9090
+  otlphttp:
+    endpoint: http://loki:3100/otlp
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp]
+      processors: [batch]
+      exporters: [debug, otlp]
     metrics:
       receivers: [otlp]
-      exporters: [prometheus]
+      processors: [batch]
+      exporters: [debug, prometheus]
+    logs:
+      receivers: [otlp]
+      exporters: [debug, otlphttp]
