@@ -110,7 +110,7 @@ services:
     depends_on:
       - opensearch
   otel-collector:
-    image: otel/opentelemetry-collector:0.123.0
+    image: otel/opentelemetry-collector-contrib:0.127.0
     container_name: otel-collector
     restart: unless-stopped
     command: [ "--config=/etc/otel-collector.yaml" ]
