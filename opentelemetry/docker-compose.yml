@@ -1,4 +1,23 @@
 services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8090:8080" # Exposes cAdvisor's web interface on port 8090
+    env_file:
+      - .env.cadvisor
+    privileged: true
+    volumes:
+      - /:/rootfs:ro # Mounts the root filesystem as read-only
+      - /sys:/sys:ro # Mounts the /sys directory as read-only
+      - /var/run:/var/run:ro # Mounts the /var/run directory with read-write permissions
+      - /var/run/docker.sock:/var/run/docker.sock:ro # 실행중인 모든 컨테이너 정보. 컨테이너 생성/시작/중지 등의 이벤트 모니터링
+      - /var/lib/docker/:/var/lib/docker:ro # Uncomment if using default Docker directory
+      #- /var/snap/docker/common/var-lib-docker:/var/snap/docker/common/var-lib-docker:ro # Mounts Docker's data directory as read-only
+      - /dev/disk/:/dev/disk:ro # Mounts the /dev/disk directory as read-only
+    devices:
+      - /dev/kmsg:/dev/kmsg
   grafana:
     image: grafana/grafana:11.6.1
     container_name: grafana
