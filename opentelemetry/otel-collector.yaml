@@ -28,7 +28,17 @@ processors:
 extensions:
   health_check: {} 
 exporters:
-  debug:  
+  debug:
+  opensearch:
+    logs_index: otel-index-opensearch
+    http:
+    endpoint: http://opensearch-node1:9200
+    auth:
+      authenticator: basicauth/client
+    tls:
+      insecure: true
+      insecure_skip_verify: true 
+      timeout: 60s  
   otlp:
     endpoint: jaeger:4317
     tls:
@@ -62,4 +72,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [resource/remove_sdk_attributes, batch]
-      exporters: [debug, otlphttp]
+      exporters: [debug, otlphttp, opensearch]
