@@ -1,0 +1,65 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318        
+        cors:
+          allowed_origins:
+            - http://*
+            - https://*
+processors:
+  resource/remove_sdk_attributes:
+    attributes:
+      - key: process.command_args
+        action: delete
+      - key: telemetry.distro.name
+        action: delete
+      - key: telemetry.distro.version
+        action: delete
+      - key: telemetry.sdk.language
+        action: delete
+      - key: telemetry.sdk.name
+        action: delete
+      - key: telemetry.sdk.version
+        action: delete
+  batch:
+extensions:
+  health_check: {} 
+exporters:
+  debug:  
+  otlp:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
+    tls:
+      insecure: true
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  #prometheus:
+  #  endpoint: 0.0.0.0:9090
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    tls:
+      insecure: true
+  otlphttp:
+    endpoint: http://loki:3100/otlp
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource/remove_sdk_attributes, batch]
+      exporters: [debug, otlp, otlphttp/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [resource/remove_sdk_attributes, batch]
+      exporters: [debug, prometheusremotewrite]
+    logs:
+      receivers: [otlp]
+      processors: [resource/remove_sdk_attributes, batch]
+      exporters: [debug, otlphttp]
