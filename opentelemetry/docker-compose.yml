@@ -47,7 +47,7 @@ services:
       - ./loki.yaml:/etc/loki/loki.yaml
       - ${DATA_DIR}/loki/data:/loki
   node-exporter:
-    image: bitnami/node-exporter:latest
+    image: bitnami/node-exporter:1.9.1
     container_name: node-exporter
     restart: unless-stopped
     ports:
