@@ -132,7 +132,7 @@ services:
       - prometheus
       - tempo
   portainer:
-    image: portainer/portainer-ce:2.27.5
+    image: portainer/portainer-ce:2.27.6
     container_name: portainer
     restart: unless-stopped
     ports:
@@ -166,6 +166,29 @@ services:
       options:
         max-size: "8m"
         max-file: "10"
+  valkey:
+    image: valkey/valkey:8.1.1
+    container_name: valkey
+    restart: unless-stopped
+    env_file:
+      - .env.valkey
+    labels:
+      - "mode=standalone"
+    ports:
+      - "6379:6379"
+      - "6380:6379" # For Redis Sentinel
+    volumes:
+      - ${DATA_DIR}/valkey:/data
+  redis-exporter:
+    image: bitnami/redis-exporter:1.73.0
+    container_name: redis_exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    command:
+      - '--redis.addr=redis://valkey:6379'
+    links:
+      - valkey
   tempo:
     container_name: tempo
     image: grafana/tempo:2.7.2

@@ -56,3 +56,12 @@ scrape_configs:
 - job_name: tempo
   static_configs:
   - targets: ['tempo:3200']
+- job_name: valkey
+  honor_timestamps: true
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - redis_exporter:9121
