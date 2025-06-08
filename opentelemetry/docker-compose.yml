@@ -210,6 +210,11 @@ services:
       - "4321:4317"   # otlp grpc
       - "4320:4318"   # otlp http
       - "9411:9411"   # zipkin
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"  # 최대 1개의 코어 할당
+          memory: 2G    # 최대 2GB의 메모리 할당
 networks:
   compose_network:
     driver: bridge

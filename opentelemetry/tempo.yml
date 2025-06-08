@@ -34,7 +34,7 @@ distributor:
 compactor:
   compaction:
     max_block_bytes: 100_000_000
-    block_retention: 336h  # overall Tempo trace retention. set for demo purposes
+    block_retention: 168h  # overall Tempo trace retention. set for demo purposes
 
 metrics_generator:
   registry:
