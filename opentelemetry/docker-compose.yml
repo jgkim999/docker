@@ -65,6 +65,20 @@ services:
     volumes:
       - ./loki.yaml:/etc/loki/loki.yaml
       - ${DATA_DIR}/loki/data:/loki
+  mysql:
+    image: mysql:lts
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    env_file:
+      - .env.mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./mysql.conf:/etc/mysql/my.cnf
+      - ${DATA_DIR}/mysql:/var/lib/mysql
   node-exporter:
     image: bitnami/node-exporter:1.9.1
     container_name: node-exporter
