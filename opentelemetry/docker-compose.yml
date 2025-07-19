@@ -1,6 +1,6 @@
 services:
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.53.0
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
     container_name: cadvisor
     restart: unless-stopped
     ports:
@@ -19,7 +19,7 @@ services:
     devices:
       - /dev/kmsg:/dev/kmsg
   grafana:
-    image: grafana/grafana:12.0.2
+    image: grafana/grafana:12.0.1
     container_name: grafana
     restart: unless-stopped
     user: ":"
@@ -36,7 +36,7 @@ services:
       - tempo
       - loki
   jaeger:
-    image: "jaegertracing/jaeger:2.6.0"
+    image: "jaegertracing/jaeger:2.5.0"
     container_name: jaeger
     restart: unless-stopped
     ports:
@@ -46,7 +46,7 @@ services:
     env_file:
       - .env.jaeger
   loki:
-    image: grafana/loki:3.5.1
+    image: grafana/loki:3.5.0
     container_name: loki
     restart: unless-stopped
     env_file:
@@ -80,7 +80,7 @@ services:
       - ./mysql.conf:/etc/mysql/my.cnf
       - ${DATA_DIR}/mysql:/var/lib/mysql
   node-exporter:
-    image: bitnami/node-exporter:1.9.2
+    image: bitnami/node-exporter:1.9.1
     container_name: node-exporter
     restart: unless-stopped
     ports:
@@ -88,7 +88,7 @@ services:
     env_file:
       - .env.node-exporter
   opensearch:
-    image: opensearchproject/opensearch:3.0.1
+    image: opensearchproject/opensearch:3.0.0
     container_name: opensearch-node1
     restart: unless-stopped
     user: "1000:1000" # sudo chown -R username:group directory
@@ -108,7 +108,7 @@ services:
     volumes:
       - ${DATA_DIR}/opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
   opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:3.0.1 # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
+    image: opensearchproject/opensearch-dashboards:3.0.0 # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
     container_name: opensearch-dashboards
     restart: unless-stopped
     ports:
@@ -124,7 +124,7 @@ services:
     depends_on:
       - opensearch
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.128.0
+    image: otel/opentelemetry-collector-contrib:0.127.0
     container_name: otel-collector
     restart: unless-stopped
     command: [ "--config=/etc/otel-collector.yaml" ]
@@ -146,7 +146,7 @@ services:
       - prometheus
       - tempo
   portainer:
-    image: portainer/portainer-ce:2.27.7
+    image: portainer/portainer-ce:2.27.6
     container_name: portainer
     restart: unless-stopped
     ports:
@@ -157,7 +157,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DATA_DIR}/portainer/data:/data
   prometheus:
-    image: bitnami/prometheus:3.4.0
+    image: bitnami/prometheus:3.3.1
     container_name: prometheus
     restart: unless-stopped
     user: ":"
@@ -181,7 +181,7 @@ services:
         max-size: "8m"
         max-file: "10"
   valkey:
-    image: valkey/valkey:8.2.0
+    image: valkey/valkey:8.1.1
     container_name: valkey
     restart: unless-stopped
     env_file:
@@ -194,7 +194,7 @@ services:
     volumes:
       - ${DATA_DIR}/valkey:/data
   redis-exporter:
-    image: bitnami/redis-exporter:1.74.0
+    image: bitnami/redis-exporter:1.73.0
     container_name: redis_exporter
     restart: unless-stopped
     ports:
@@ -205,7 +205,7 @@ services:
       - valkey
   tempo:
     container_name: tempo
-    image: grafana/tempo:2.7.3
+    image: grafana/tempo:2.7.2
     restart: unless-stopped
     env_file:
       - .env.tempo
