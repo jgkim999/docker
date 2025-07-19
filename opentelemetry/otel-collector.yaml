@@ -85,12 +85,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [resource/remove_sdk_attributes, batch]
-      exporters: [debug, otlp/jaeger, otlphttp/tempo]
+      exporters: [otlp/jaeger, otlphttp/tempo]
     metrics:
       receivers: [otlp]
       processors: [resource/remove_sdk_attributes, batch]
-      exporters: [debug, prometheusremotewrite]
+      exporters: [prometheusremotewrite]
     logs:
       receivers: [otlp]
       processors: [resource/remove_sdk_attributes, batch]
-      exporters: [debug, otlphttp]
+      exporters: [otlphttp]

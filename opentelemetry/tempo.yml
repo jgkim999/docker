@@ -9,8 +9,15 @@ query_frontend:
     duration_slo: 30s
 
 ingester:
-  max_block_duration: 5m # cut the headblock when this much time passes. this is being set for demo purposes and should probably be left alone normally
-  trace_idle_period: 1s
+  trace_idle_period: 5s # default 10s, amount of time a trace must be idle before flushing it to the wal.
+  flush_check_period: 5s # default 10s, how often to sweep all tenants and move traces from live -> wal -> completed blocks.
+  max_block_bytes: 268435456 # maximum size of a block before cutting it (default: 524288000 = 500MB)
+  max_block_duration: 10m # maximum length of time before cutting a block (default: 30m)
+  # duration to keep blocks in the ingester after they have been flushed
+  # (default: 15m)
+  complete_block_timeout: 5m
+  # Flush all traces to backend when ingester is stopped, default = false
+  flush_all_on_shutdown: false
   lifecycler:
     ring:
       replication_factor: 1
@@ -34,7 +41,7 @@ distributor:
 compactor:
   compaction:
     max_block_bytes: 100_000_000
-    block_retention: 168h  # overall Tempo trace retention. set for demo purposes
+    block_retention: 24h  # overall Tempo trace retention. set for demo purposes
 
 metrics_generator:
   registry:
