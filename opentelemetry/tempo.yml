@@ -3,10 +3,10 @@ server:
 
 query_frontend:
   search:
-    duration_slo: 5s
+    duration_slo: 15s
     throughput_bytes_slo: 1.073741824e+09
   trace_by_id:
-    duration_slo: 5s
+    duration_slo: 30s
 
 ingester:
   max_block_duration: 5m # cut the headblock when this much time passes. this is being set for demo purposes and should probably be left alone normally
