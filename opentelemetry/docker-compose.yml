@@ -227,8 +227,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.00"  # 최대 1개의 코어 할당
-          memory: 2G    # 최대 2GB의 메모리 할당
+          cpus: "8.00"  # 최대 8개의 코어 할당
+          memory: 8G    # 최대 8GB의 메모리 할당
 networks:
   compose_network:
     driver: bridge
