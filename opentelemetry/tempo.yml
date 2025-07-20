@@ -5,15 +5,17 @@ server:
 query_frontend:
   search:
     duration_slo: 15s
-    throughput_bytes_slo: 1.073741824e+09
+    # If set to a non-zero value, it's value will be used to decide if query is within SLO or not.
+    # Query is within SLO if it returned 200 within duration_slo seconds OR processed throughput_slo bytes/s data.
+    throughput_bytes_slo: 0
   trace_by_id:
-    duration_slo: 30s
+    duration_slo: 0s
 
 ingester:
   trace_idle_period: 5s # default 10s, amount of time a trace must be idle before flushing it to the wal.
   flush_check_period: 5s # default 10s, how often to sweep all tenants and move traces from live -> wal -> completed blocks.
-  max_block_bytes: 268435456 # maximum size of a block before cutting it (default: 524288000 = 500MB)
-  max_block_duration: 10m # maximum length of time before cutting a block (default: 30m)
+  max_block_bytes: 524288000 # maximum size of a block before cutting it (default: 524288000 = 500MB)
+  max_block_duration: 30m # maximum length of time before cutting a block (default: 30m)
   # duration to keep blocks in the ingester after they have been flushed
   # (default: 15m)
   complete_block_timeout: 5m
@@ -21,8 +23,8 @@ ingester:
   flush_all_on_shutdown: false
   lifecycler:
     ring:
-      replication_factor: 1
-
+      replication_factor: 3
+      
 distributor:
   receivers:
     jaeger:                  # the receives all come from the OpenTelemetry collector.  more configuration information can
