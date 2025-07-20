@@ -41,23 +41,22 @@ distributor:
 
 compactor:
   compaction:
-    max_block_bytes: 100_000_000
+    max_block_bytes: 100000000
     block_retention: 24h  # overall Tempo trace retention. set for demo purposes
 
-# metrics_generator:
-#   registry:
-#     external_labels:
-#       source: tempo
-#       cluster: docker-compose
-#   storage:
-#     path: /var/tempo/generator/wal
-#   # Comment out remote_write for now to avoid connection issues
-#   # remote_write:
-#   #   - url: http://prometheus:9090/api/v1/write
-#   #     send_exemplars: true
-#   #     headers:
-#   #       X-Prometheus-Remote-Write-Version: "0.1.0"
-
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: docker-compose
+  storage:
+    path: /var/tempo/generator/wal
+  # Comment out remote_write for now to avoid connection issues
+  remote_write:
+    - url: http://prometheus:9090/api/v1/write
+    #send_exemplars: true
+  headers:
+    X-Prometheus-Remote-Write-Version: "0.1.0"
 storage:
   trace:
     backend: local # backend configuration to use
@@ -67,5 +66,4 @@ storage:
       path: /var/tempo/blocks
 
 overrides:
-  # metrics_generator_processors: [service-graphs, span-metrics, 'local-blocks'] # enables metrics generator  
-  
+  metrics_generator_processors: ['span-metrics', 'local-blocks'] # enables metrics generator
