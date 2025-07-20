@@ -51,19 +51,14 @@ metrics_generator:
       cluster: docker-compose
   storage:
     path: /var/tempo/generator/wal
-  # Comment out remote_write for now to avoid connection issues
-  remote_write:
-    - url: http://prometheus:9090/api/v1/write
-    #send_exemplars: true
-  headers:
-    X-Prometheus-Remote-Write-Version: "0.1.0"
+  # remote_write 및 headers 필드는 현재 버전에서 지원되지 않아 제거
 storage:
   trace:
     backend: local # backend configuration to use
     wal:
-      path: /tmp/tempo/wal # where to store the the wal locally
+      path: /var/tempo/wal # where to store the the wal locally
     local:
-      path: /tmp/tempo/blocks
+      path: /var/tempo/blocks
 
 overrides:
   metrics_generator_processors: ['span-metrics', 'local-blocks'] # enables metrics generator
