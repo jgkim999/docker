@@ -50,15 +50,15 @@ metrics_generator:
       source: tempo
       cluster: docker-compose
   storage:
-    path: /var/tempo/generator/wal
+    path: /tmp/tempo/generator/wal
   # remote_write 및 headers 필드는 현재 버전에서 지원되지 않아 제거
 storage:
   trace:
     backend: local # backend configuration to use
     wal:
-      path: /var/tempo/wal # where to store the the wal locally
+      path: /tmp/tempo/wal # where to store the the wal locally
     local:
-      path: /var/tempo/blocks
+      path: /tmp/tempo/blocks
 
 overrides:
   metrics_generator_processors: ['span-metrics', 'local-blocks'] # enables metrics generator
