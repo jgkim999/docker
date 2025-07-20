@@ -226,7 +226,7 @@ services:
       ]
     volumes:
       - ./tempo.yml:/etc/tempo/config/tempo.yml
-      - ${DATA_DIR}/tempo:/var
+      - ${DATA_DIR}/tempo:/var/tempo
     ports:
       - "14268:14268" # jaeger ingest
       - "3200:3200"   # tempo
