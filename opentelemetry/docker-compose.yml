@@ -234,6 +234,10 @@ services:
       - "4321:4317"   # otlp grpc
       - "4320:4318"   # otlp http
       - "9411:9411"   # zipkin
-networks:
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4g
   compose_network:
     driver: bridge
