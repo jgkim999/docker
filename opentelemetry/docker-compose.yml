@@ -239,5 +239,3 @@ services:
         limits:
           cpus: '2.0'
           memory: 4g
-  compose_network:
-    driver: bridge
