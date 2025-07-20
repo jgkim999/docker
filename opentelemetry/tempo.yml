@@ -61,4 +61,9 @@ storage:
       path: /tmp/tempo/blocks
 
 overrides:
-  metrics_generator_processors: ['span-metrics', 'local-blocks'] # enables metrics generator
+#  metrics_generator_processors: ['span-metrics', 'local-blocks'] # enables metrics generator
+  defaults:
+    ingestion:
+      rate_limit_bytes: 30000000
+      burst_size_bytes: 40000000
+ 
