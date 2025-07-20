@@ -1,5 +1,6 @@
 server:
   http_listen_port: 3200
+  log_level: info
 
 query_frontend:
   search:
@@ -50,9 +51,12 @@ metrics_generator:
       cluster: docker-compose
   storage:
     path: /tmp/tempo/generator/wal
-    remote_write:
-      - url: http://prometheus:9090/api/v1/write
-        send_exemplars: true
+  # Comment out remote_write for now to avoid connection issues
+  # remote_write:
+  #   - url: http://prometheus:9090/api/v1/write
+  #     send_exemplars: true
+  #     headers:
+  #       X-Prometheus-Remote-Write-Version: "0.1.0"
 
 storage:
   trace:
