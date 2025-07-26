@@ -1,5 +1,7 @@
 services:
   cadvisor:
+    # cAdvisor is a tool for monitoring container performance
+    # https://console.cloud.google.com/artifacts/docker/cadvisor/us/gcr.io/cadvisor?pli=1&invt=Ab3vrA&inv=1
     image: gcr.io/cadvisor/cadvisor:v0.52.1
     container_name: cadvisor
     restart: unless-stopped
@@ -19,7 +21,9 @@ services:
     devices:
       - /dev/kmsg:/dev/kmsg
   grafana:
-    image: grafana/grafana:12.0.2
+    # Grafana is an open-source platform for monitoring and observability
+    # https://hub.docker.com/r/grafana/grafana
+    image: grafana/grafana:12.1.0
     container_name: grafana
     restart: unless-stopped
     user: ":"
@@ -36,6 +40,8 @@ services:
       - tempo
       - loki
   jaeger:
+    # Jaeger is an open-source, end-to-end distributed tracing system
+    # https://hub.docker.com/r/jaegertracing/jaeger
     image: "jaegertracing/jaeger:2.8.0"
     container_name: jaeger
     restart: unless-stopped
@@ -46,6 +52,8 @@ services:
     env_file:
       - .env.jaeger
   loki:
+    # Loki is a log aggregation system designed to work seamlessly with Grafana
+    # https://hub.docker.com/r/grafana/loki
     image: grafana/loki:3.5
     container_name: loki
     restart: unless-stopped
@@ -66,7 +74,9 @@ services:
       - ./loki.yaml:/etc/loki/loki.yaml
       - ${DATA_DIR}/loki/data:/loki
   mysql:
-    image: mysql:lts
+    # MySQL is a popular open-source relational database management system
+    # https://hub.docker.com/_/mysql
+    image: mysql:8.4.6
     container_name: mysql
     restart: unless-stopped
     ports:
@@ -80,6 +90,8 @@ services:
       - ./mysql.conf:/etc/mysql/my.cnf
       - ${DATA_DIR}/mysql:/var/lib/mysql
   node-exporter:
+    # Node Exporter is a Prometheus exporter for hardware and OS metrics
+    # https://hub.docker.com/r/bitnami/node-exporter
     image: bitnami/node-exporter:1.9.1
     container_name: node-exporter
     restart: unless-stopped
@@ -88,7 +100,8 @@ services:
     env_file:
       - .env.node-exporter
   opensearch:
-    image: opensearchproject/opensearch:3.0.0
+    # https://hub.docker.com/r/opensearchproject/opensearch
+    image: opensearchproject/opensearch:3.1.0
     container_name: opensearch-node1
     restart: unless-stopped
     user: "1000:1000" # sudo chown -R username:group directory
@@ -108,7 +121,9 @@ services:
     volumes:
       - ${DATA_DIR}/opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
   opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:3.0.0 # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
+    # https://hub.docker.com/r/opensearchproject/opensearch-dashboards
+    # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
+    image: opensearchproject/opensearch-dashboards:3.1.0 
     container_name: opensearch-dashboards
     restart: unless-stopped
     ports:
@@ -124,7 +139,9 @@ services:
     depends_on:
       - opensearch
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.127.0
+    # OpenTelemetry Collector is a vendor-agnostic agent for collecting telemetry data
+    # https://hub.docker.com/r/otel/opentelemetry-collector-contrib
+    image: otel/opentelemetry-collector-contrib:0.130.1
     container_name: otel-collector
     restart: unless-stopped
     command: [ "--config=/etc/otel-collector.yaml" ]
@@ -146,7 +163,9 @@ services:
       - prometheus
       - tempo
   portainer:
-    image: portainer/portainer-ce:2.27.6
+    # Portainer is a lightweight management UI which allows you to easily manage your Docker containers
+    # https://hub.docker.com/r/portainer/portainer-ce
+    image: portainer/portainer-ce:2.32.0
     container_name: portainer
     restart: unless-stopped
     ports:
@@ -157,7 +176,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DATA_DIR}/portainer/data:/data
   postgres:
-    image: postgres:17.5-alpine3.22
+    # PostgreSQL is a powerful, open source object-relational database system
+    # https://hub.docker.com/_/postgres
+    image: postgres:17.5
     container_name: postgres
     restart: unless-stopped
     ports:
@@ -167,7 +188,9 @@ services:
     volumes:
       - ${DATA_DIR}/postgres:/var/lib/postgresql/data
   prometheus:
-    image: bitnami/prometheus:3.3.1
+    # Prometheus is an open-source systems monitoring and alerting toolkit
+    # https://hub.docker.com/r/bitnami/prometheus
+    image: bitnami/prometheus:3.5.0
     container_name: prometheus
     restart: unless-stopped
     user: ":"
@@ -191,7 +214,9 @@ services:
         max-size: "8m"
         max-file: "10"
   valkey:
-    image: valkey/valkey:8.1.1
+    # Valkey is a Redis-compatible database with enhanced features
+    # https://hub.docker.com/r/valkey/valkey
+    image: valkey/valkey:8.1.3
     container_name: valkey
     restart: unless-stopped
     env_file:
@@ -204,7 +229,9 @@ services:
     volumes:
       - ${DATA_DIR}/valkey:/data
   redis-exporter:
-    image: bitnami/redis-exporter:1.73.0
+    # Redis Exporter is a Prometheus exporter for Redis metrics
+    # https://hub.docker.com/r/bitnami/redis-exporter
+    image: bitnami/redis-exporter:1.74.0
     container_name: redis_exporter
     restart: unless-stopped
     ports:
@@ -214,8 +241,10 @@ services:
     links:
       - valkey
   tempo:
+    # Tempo is a distributed tracing backend that integrates with Grafana
+    # https://hub.docker.com/r/grafana/tempo
     container_name: tempo
-    image: grafana/tempo:latest
+    image: grafana/tempo:main-2f3f970 # 2025-07-26
     restart: unless-stopped
     env_file:
       - .env.tempo
