@@ -12,10 +12,6 @@ or
 docker compose up -d
 ```
 
-## Opentelemetry
-
-[Opentelemetry](./opentelemetry/README.md)
-
 ## MySQL
 
 [MySql](https://www.mysql.com/)
@@ -57,9 +53,9 @@ User/Password
 
 - user/1234
 
-## Grapana
+## Grafana
 
-[Grapana](https://grafana.com/)
+[Grafana](https://grafana.com/)
 
 User/Password
 
