@@ -141,7 +141,7 @@ services:
   otel-collector:
     # OpenTelemetry Collector is a vendor-agnostic agent for collecting telemetry data
     # https://hub.docker.com/r/otel/opentelemetry-collector-contrib
-    image: otel/opentelemetry-collector-contrib:0.130.1
+    image: otel/opentelemetry-collector-contrib:0.131.1
     container_name: otel-collector
     restart: unless-stopped
     command: [ "--config=/etc/otel-collector.yaml" ]
