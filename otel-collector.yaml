@@ -80,7 +80,6 @@ service:
       exporters: [otlp/jaeger, otlphttp/tempo]
     metrics:
       receivers: [otlp]
-      processors: [batch]
       exporters: [debug, prometheusremotewrite]
     logs:
       receivers: [otlp]
