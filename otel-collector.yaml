@@ -28,10 +28,6 @@ processors:
         action: delete
       - key: process.runtime.version
         action: delete
-      - key: service.version
-        action: delete
-      - key: host.id
-        action: delete
       - key: process.command_args
         action: delete
       - key: telemetry.distro.name
@@ -43,10 +39,6 @@ processors:
       - key: telemetry.sdk.name
         action: delete
       - key: telemetry.sdk.version
-        action: delete
-      - key: service.group
-        action: delete
-      - key: service.instance.id
         action: delete
   batch:
 extensions:
@@ -88,8 +80,8 @@ service:
       exporters: [otlp/jaeger, otlphttp/tempo]
     metrics:
       receivers: [otlp]
-      processors: [resource/remove_sdk_attributes, batch]
-      exporters: [prometheusremotewrite]
+      processors: [batch]
+      exporters: [debug, prometheusremotewrite]
     logs:
       receivers: [otlp]
       processors: [resource/remove_sdk_attributes, batch]
