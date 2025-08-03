@@ -178,7 +178,7 @@ services:
   postgres:
     # PostgreSQL is a powerful, open source object-relational database system
     # https://hub.docker.com/_/postgres
-    image: postgres:17.5
+    image: jgkim999/postgres-ko:17.5
     container_name: postgres
     restart: unless-stopped
     ports:
