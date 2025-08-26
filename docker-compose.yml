@@ -216,7 +216,7 @@ services:
   rabbitmq:
     # RabbitMQ is a messaging broker that enables applications to communicate with each other
     # https://hub.docker.com/_/rabbitmq
-    image: rabbitmq:4.1-management
+    image: rabbitmq:3.13.7-management
     container_name: rabbitmq
     hostname: rabbitmq-server  # 고정 호스트네임 추가
     restart: unless-stopped
