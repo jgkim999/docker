@@ -213,6 +213,21 @@ services:
       options:
         max-size: "8m"
         max-file: "10"
+  rabbitmq:
+    # RabbitMQ is a messaging broker that enables applications to communicate with each other
+    # https://hub.docker.com/_/rabbitmq
+    image: rabbitmq:4.1-management
+    container_name: rabbitmq
+    hostname: rabbitmq-server  # 고정 호스트네임 추가
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - .env.rabbitmq
+    volumes:
+      - ${DATA_DIR}/rabbitmq/data:/var/lib/rabbitmq # Persists Mnesia data for RabbitMQ
+      - ${DATA_DIR}/rabbitmq/logs:/var/log/rabbitmq # Persists RabbitMQ logs
   valkey:
     # Valkey is a Redis-compatible database with enhanced features
     # https://hub.docker.com/r/valkey/valkey
