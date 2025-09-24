@@ -1,0 +1,17 @@
+# Data Prepper Global Configuration
+# This file contains server and metrics configuration
+
+# Server configuration
+server:
+  port: 4900
+  health_check_service: true
+
+# Metrics configuration  
+metrics:
+  prometheus:
+    port: 9600
+
+# Logging configuration
+logging:
+  level: INFO
+  format: JSON

@@ -152,6 +152,7 @@ services:
       - "9601:9600"   # Prometheus metrics endpoint
     volumes:
       - ./data-prepper.yaml:/usr/share/data-prepper/pipelines/data-prepper.yaml
+      - ./data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
       - ./data-prepper-error-config.yaml:/usr/share/data-prepper/config/error-config.yaml
       - ./opensearch-logs-template.json:/usr/share/data-prepper/templates/opensearch-logs-template.json
       - ./dlq-management.sh:/usr/share/data-prepper/bin/dlq-management.sh

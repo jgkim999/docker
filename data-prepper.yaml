@@ -1,15 +1,6 @@
-# Data Prepper Configuration File
-# This file defines the global configuration and pipelines for Data Prepper
-
-# Global server configuration
-server:
-  port: 4900
-  health_check_service: true
-
-# Metrics configuration
-metrics:
-  prometheus:
-    port: 9600
+# Data Prepper Pipeline Configuration File
+# Only pipeline definitions should be in this file
+# Global server and metrics configuration should be in data-prepper-config.yaml or environment variables
 
 # Log processing pipeline
 log-pipeline:
