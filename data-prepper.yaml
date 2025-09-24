@@ -1,23 +1,15 @@
-version: "2"
-data-prepper:
-  # Health check and metrics configuration
-  server:
-    port: 4900
-    health_check_service: true
-  metrics:
-    prometheus:
-      port: 9600
-  
-  # Global error handling configuration
-  error_handling:
-    # Log level for Data Prepper internal logs
-    log_level: "INFO"
-    # Error log format (JSON for structured logging)
-    log_format: "JSON"
-    # Maximum number of processing errors before circuit breaker opens
-    max_errors_threshold: 100
-    # Circuit breaker reset timeout
-    circuit_breaker_timeout: "30s"
+# Data Prepper Configuration File
+# This file defines the global configuration and pipelines for Data Prepper
+
+# Global server configuration
+server:
+  port: 4900
+  health_check_service: true
+
+# Metrics configuration
+metrics:
+  prometheus:
+    port: 9600
 
 # Log processing pipeline
 log-pipeline:
