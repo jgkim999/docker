@@ -32,7 +32,7 @@ service-map-pipeline:
       ssl: false
 
   processor:
-    - service_map_stateful: {}
+    - service_map: {}
 
   sink:
     - opensearch:
