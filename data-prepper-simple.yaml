@@ -9,6 +9,11 @@ log-pipeline:
         hosts:
           - "http://opensearch:9200"
         index: "logs-%{yyyy.MM.dd}"
+        action: "index"
+        template_type: "index_template"
+        template_file: null
+        document_id: null
+        routing: null
 
 trace-pipeline:
   source:
