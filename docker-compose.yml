@@ -152,8 +152,6 @@ services:
       - "9601:9600"   # Prometheus metrics endpoint
     volumes:
       - ./data-prepper.yaml:/usr/share/data-prepper/pipelines/data-prepper.yaml
-      - ./data-prepper-config.yaml:/usr/share/data-prepper/config/data-prepper-config.yaml
-      - ./data-prepper-error-config.yaml:/usr/share/data-prepper/config/error-config.yaml
       - ./opensearch-logs-template.json:/usr/share/data-prepper/templates/opensearch-logs-template.json
       - ./dlq-management.sh:/usr/share/data-prepper/bin/dlq-management.sh
       - ${DATA_DIR}/data-prepper/data:/usr/share/data-prepper/data
@@ -162,6 +160,10 @@ services:
       - ${DATA_DIR}/data-prepper/dlq/archive:/usr/share/data-prepper/data/dlq/archive
       - ${DATA_DIR}/data-prepper/dlq/reprocessing:/usr/share/data-prepper/data/dlq/reprocessing
     environment:
+      # Server configuration
+      - DATA_PREPPER_SERVER_PORT=4900
+      # Metrics configuration
+      - DATA_PREPPER_METRICS_PROMETHEUS_PORT=9600
       # Error handling configuration
       - DATA_PREPPER_LOG_LEVEL=INFO
       - DATA_PREPPER_LOG_FORMAT=JSON

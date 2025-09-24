@@ -1,17 +1,33 @@
 # Data Prepper Global Configuration
 # This file contains server and metrics configuration
 
-# Server configuration
-server:
-  port: 4900
-  health_check_service: true
+# Server port configuration
+server_port: 4900
 
-# Metrics configuration  
-metrics:
-  prometheus:
-    port: 9600
+# SSL configuration (if needed)
+ssl: false
 
-# Logging configuration
-logging:
-  level: INFO
-  format: JSON
+# Authentication configuration (if needed)
+authentication:
+  disabled: true
+
+# Circuit breaker configuration
+circuit_breakers:
+  heap:
+    usage: 95
+    check_interval: 5s
+    
+# Processor shutdown timeout
+processor_shutdown_timeout: 30s
+
+# Sink shutdown timeout  
+sink_shutdown_timeout: 30s
+
+# Metric registries configuration
+metric_registries:
+  - "Prometheus"
+
+# Metric tags (optional)
+metric_tags:
+  service: "data-prepper"
+  environment: "production"
