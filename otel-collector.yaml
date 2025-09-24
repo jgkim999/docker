@@ -4,75 +4,25 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
       http:
-        endpoint: 0.0.0.0:4318        
+        endpoint: 0.0.0.0:4318
         cors:
           allowed_origins:
             - http://*
             - https://*
+
 processors:
-  resource/remove_sdk_attributes:
+  resource:
     attributes:
-      - key: process.command
-        action: delete
-      - key: process.executable.name
-        action: delete
-      - key: process.executable.path
-        action: delete
-      - key: process.owner
-        action: delete
-      - key: process.pid
-        action: delete
-      - key: process.runtime.description
-        action: delete
-      - key: process.runtime.name
-        action: delete
-      - key: process.runtime.version
-        action: delete
-      - key: process.command_args
-        action: delete
-      - key: telemetry.distro.name
-        action: delete
-      - key: telemetry.distro.version
-        action: delete
-      - key: telemetry.sdk.language
-        action: delete
-      - key: telemetry.sdk.name
-        action: delete
-      - key: telemetry.sdk.version
-        action: delete
+      - key: pipeline_source
+        value: "otel-collector"
+        action: upsert
   batch:
-extensions:
-  health_check: {} 
+    timeout: 5s
+    send_batch_size: 1024
+
 exporters:
-  debug:
-  #opensearch/log:
-  #  endpoints: [http://localhost:9200]
-  #  logs_index: otel_log_index
-  #  sending_queue:
-  #    enabled: true
-  #    num_consumers: 20
-  #    queue_size: 1000
-  otlp/jaeger:
-    endpoint: jaeger:4317
-    tls:
-      insecure: true
-  otlphttp/tempo:
-    endpoint: http://tempo:4318
-    tls:
-      insecure: true
-  otlp/tempo:
-    endpoint: tempo:4317
-    tls:
-      insecure: true
-  #prometheus:
-  #  endpoint: 0.0.0.0:9090
-  prometheusremotewrite:
-    endpoint: http://prometheus:9090/api/v1/write
-    tls:
-      insecure: true
-  otlphttp:
-    endpoint: http://loki:3100/otlp
-  otlp/dataprepper:
+  # Data Prepper for logs and traces
+  otlp/dataprepper-logs:
     endpoint: data-prepper:21892
     tls:
       insecure: true
@@ -85,16 +35,58 @@ exporters:
       initial_interval: 1s
       max_interval: 30s
       max_elapsed_time: 300s
+
+  otlp/dataprepper-traces:
+    endpoint: data-prepper:21890
+    tls:
+      insecure: true
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 30s
+      max_elapsed_time: 300s
+
+  # Backup exporters for redundancy
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
+    tls:
+      insecure: true
+
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
 service:
+  extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [resource/remove_sdk_attributes, batch]
-      exporters: [otlp/jaeger, otlphttp/tempo]
-    metrics:
-      receivers: [otlp]
-      exporters: [debug, prometheusremotewrite]
+      processors: [resource, batch]
+      exporters: [otlp/dataprepper-traces, otlp/jaeger, otlphttp/tempo]
+
     logs:
       receivers: [otlp]
-      processors: [resource/remove_sdk_attributes, batch]
-      exporters: [otlphttp, otlp/dataprepper]
+      processors: [resource, batch]
+      exporters: [otlp/dataprepper-logs]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheusremotewrite, debug]
