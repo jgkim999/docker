@@ -72,6 +72,19 @@ exporters:
       insecure: true
   otlphttp:
     endpoint: http://loki:3100/otlp
+  otlp/dataprepper:
+    endpoint: data-prepper:21892
+    tls:
+      insecure: true
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 30s
+      max_elapsed_time: 300s
 service:
   pipelines:
     traces:
@@ -84,4 +97,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [resource/remove_sdk_attributes, batch]
-      exporters: [otlphttp]
+      exporters: [otlphttp, otlp/dataprepper]

@@ -1,0 +1,181 @@
+{
+  "index_patterns": ["logs-*"],
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 1,
+        "refresh_interval": "5s",
+        "codec": "best_compression"
+      }
+    },
+    "mappings": {
+      "dynamic": "true",
+      "dynamic_templates": [
+        {
+          "resource_attributes": {
+            "path_match": "resource.*",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "log_attributes": {
+            "path_match": "attributes.*",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        {
+          "parsed_log_fields": {
+            "path_match": "parsed_log.*",
+            "mapping": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "timestamp": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
+        "service_name": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "service_version": {
+          "type": "keyword",
+          "ignore_above": 64
+        },
+        "severity_text": {
+          "type": "keyword",
+          "ignore_above": 32
+        },
+        "severity_number": {
+          "type": "integer"
+        },
+        "body": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        },
+        "trace_id": {
+          "type": "keyword",
+          "ignore_above": 32
+        },
+        "span_id": {
+          "type": "keyword",
+          "ignore_above": 16
+        },
+        "flags": {
+          "type": "integer"
+        },
+        
+"resource": {
+          "type": "object",
+          "dynamic": true,
+          "properties": {
+            "service.name": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "service.version": {
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "service.instance.id": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "host.name": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "container.name": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "container.id": {
+              "type": "keyword",
+              "ignore_above": 64
+            },
+            "k8s.pod.name": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "k8s.namespace.name": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "dynamic": true
+        },
+        "parsed_log": {
+          "type": "object",
+          "dynamic": true,
+          "properties": {
+            "timestamp": {
+              "type": "date",
+              "format": "strict_date_optional_time||epoch_millis"
+            },
+            "level": {
+              "type": "keyword",
+              "ignore_above": 32
+            }
+          }
+        },
+        "scope": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "version": {
+              "type": "keyword",
+              "ignore_above": 64
+            }
+          }
+        }
+      }
+    }
+  },
+  "priority": 100,
+  "version": 1,
+  "_meta": {
+    "description": "OpenSearch index template for Data Prepper processed logs",
+    "created_by": "data-prepper-pipeline",
+    "version": "1.0.0"
+  }
+}

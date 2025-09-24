@@ -138,6 +138,47 @@ services:
       - default
     depends_on:
       - opensearch
+  data-prepper:
+    # OpenSearch Data Prepper is a server-side data collector for filtering, enriching, transforming, normalizing, and aggregating data
+    # https://hub.docker.com/r/opensearchproject/data-prepper
+    image: opensearchproject/data-prepper:2
+    container_name: data-prepper
+    restart: unless-stopped
+    env_file:
+      - .env.data-prepper
+    ports:
+      - "21892:21892" # OTLP gRPC receiver for logs
+      - "4900:4900"   # HTTP API and health check endpoint
+      - "9600:9600"   # Prometheus metrics endpoint
+    volumes:
+      - ./data-prepper.yaml:/usr/share/data-prepper/pipelines/data-prepper.yaml
+      - ./data-prepper-error-config.yaml:/usr/share/data-prepper/config/error-config.yaml
+      - ./opensearch-logs-template.json:/usr/share/data-prepper/templates/opensearch-logs-template.json
+      - ./dlq-management.sh:/usr/share/data-prepper/bin/dlq-management.sh
+      - ${DATA_DIR}/data-prepper/data:/usr/share/data-prepper/data
+      - ${DATA_DIR}/data-prepper/logs:/usr/share/data-prepper/logs
+      - ${DATA_DIR}/data-prepper/dlq:/usr/share/data-prepper/data/dlq
+      - ${DATA_DIR}/data-prepper/dlq/archive:/usr/share/data-prepper/data/dlq/archive
+      - ${DATA_DIR}/data-prepper/dlq/reprocessing:/usr/share/data-prepper/data/dlq/reprocessing
+    environment:
+      # Error handling configuration
+      - DATA_PREPPER_LOG_LEVEL=INFO
+      - DATA_PREPPER_LOG_FORMAT=JSON
+      - DLQ_BASE_DIR=/usr/share/data-prepper/data/dlq
+      - DLQ_RETENTION_DAYS=7
+      - DLQ_MAX_SIZE=1gb
+      # JVM settings for error handling
+      - JAVA_OPTS=-Xms512m -Xmx1g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/usr/share/data-prepper/logs/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4900/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      - opensearch
+    networks:
+      - default
   otel-collector:
     # OpenTelemetry Collector is a vendor-agnostic agent for collecting telemetry data
     # https://hub.docker.com/r/otel/opentelemetry-collector-contrib
@@ -162,6 +203,7 @@ services:
       - loki
       - prometheus
       - tempo
+      - data-prepper
   portainer:
     # Portainer is a lightweight management UI which allows you to easily manage your Docker containers
     # https://hub.docker.com/r/portainer/portainer-ce

@@ -1,0 +1,251 @@
+# Data Prepper Error Handling Configuration
+# This file defines comprehensive error handling policies and DLQ management
+
+error_handling:
+  # Global error handling settings
+  global:
+    # Error log level (TRACE, DEBUG, INFO, WARN, ERROR)
+    log_level: "INFO"
+    
+    # Error log format (JSON for structured logging)
+    log_format: "JSON"
+    
+    # Error log output destinations
+    log_outputs:
+      - type: "stdout"
+        format: "json"
+        level: "ERROR"
+      - type: "file"
+        path: "/usr/share/data-prepper/logs/error.log"
+        format: "json"
+        level: "WARN"
+        # Log rotation settings
+        max_file_size: "100mb"
+        max_files: 10
+        
+    # Circuit breaker configuration
+    circuit_breaker:
+      # Failure threshold before opening circuit
+      failure_threshold: 50
+      # Success threshold to close circuit
+      success_threshold: 10
+      # Timeout before attempting to close circuit
+      timeout: "60s"
+      # Monitoring window for failure rate calculation
+      monitoring_window: "5m"
+
+  # Pipeline-specific error handling
+  pipelines:
+    log-pipeline:
+      # Maximum processing errors per minute before throttling
+      max_errors_per_minute: 100
+      
+      # Error categorization and handling
+      error_categories:
+        parsing_errors:
+          # Grok parsing failures, date parsing failures
+          action: "tag_and_continue"
+          tags: ["_parse_failure"]
+          dlq_enabled: false
+          
+        transformation_errors:
+          # Mutate processor failures, field mapping errors
+          action: "tag_and_continue"
+          tags: ["_transform_failure"]
+          dlq_enabled: false
+          
+        validation_errors:
+          # Schema validation failures, required field missing
+          action: "dlq"
+          dlq_enabled: true
+          
+        sink_errors:
+          # OpenSearch indexing failures, connection errors
+          action: "retry_then_dlq"
+          dlq_enabled: true
+          
+        critical_errors:
+          # System errors, out of memory, etc.
+          action: "stop_pipeline"
+          dlq_enabled: true
+          alert_enabled: true
+
+  # Dead Letter Queue configuration
+  dlq:
+    # Global DLQ settings
+    global:
+      # Base directory for all DLQ files
+      base_directory: "/usr/share/data-prepper/data/dlq"
+      
+      # Default file naming pattern
+      file_pattern: "{pipeline_name}-{error_type}-%{yyyy-MM-dd-HH}.json"
+      
+      # Default retention policy
+      retention:
+        # Keep DLQ files for 7 days
+        days: 7
+        # Maximum total DLQ storage size (1GB)
+        max_total_size: "1gb"
+        # Cleanup interval
+        cleanup_interval: "1h"
+        
+      # DLQ file rotation
+      rotation:
+        # Maximum file size before rotation
+        max_file_size: "100mb"
+        # Maximum number of files per category
+        max_files_per_category: 10
+        
+      # DLQ monitoring
+      monitoring:
+        # Enable DLQ size monitoring
+        enabled: true
+        # Alert when DLQ size exceeds threshold
+        size_alert_threshold: "500mb"
+        # Alert when DLQ file count exceeds threshold
+        file_count_alert_threshold: 50
+        
+    # Pipeline-specific DLQ settings
+    pipelines:
+      log-pipeline:
+        categories:
+          validation_failures:
+            file_pattern: "logs-validation-failures-%{yyyy-MM-dd-HH}.json"
+            retention_days: 3
+            max_file_size: "50mb"
+            
+          sink_failures:
+            file_pattern: "logs-sink-failures-%{yyyy-MM-dd-HH}.json"
+            retention_days: 7
+            max_file_size: "100mb"
+            
+          critical_failures:
+            file_pattern: "logs-critical-failures-%{yyyy-MM-dd-HH}.json"
+            retention_days: 30
+            max_file_size: "200mb"
+
+  # Retry configuration
+  retry:
+    # Default retry policy
+    default:
+      # Maximum number of retries
+      max_attempts: 5
+      
+      # Backoff strategy (linear, exponential, fixed)
+      backoff_strategy: "exponential"
+      
+      # Initial delay before first retry
+      initial_delay: "1s"
+      
+      # Maximum delay between retries
+      max_delay: "30s"
+      
+      # Multiplier for exponential backoff
+      backoff_multiplier: 2.0
+      
+      # Jitter to avoid thundering herd (0.0 to 1.0)
+      jitter: 0.1
+      
+    # Operation-specific retry policies
+    operations:
+      opensearch_index:
+        max_attempts: 5
+        backoff_strategy: "exponential"
+        initial_delay: "2s"
+        max_delay: "60s"
+        backoff_multiplier: 2.0
+        # Retry on specific HTTP status codes
+        retry_on_status: [429, 502, 503, 504]
+        
+      opensearch_connection:
+        max_attempts: 3
+        backoff_strategy: "linear"
+        initial_delay: "5s"
+        max_delay: "30s"
+        
+      file_operations:
+        max_attempts: 3
+        backoff_strategy: "fixed"
+        initial_delay: "1s"
+        max_delay: "5s"
+
+  # Alerting configuration
+  alerting:
+    # Enable alerting
+    enabled: true
+    
+    # Alert channels
+    channels:
+      # Log-based alerting (for integration with external systems)
+      log:
+        enabled: true
+        log_level: "ERROR"
+        format: "json"
+        
+      # Metrics-based alerting (for Prometheus/Grafana)
+      metrics:
+        enabled: true
+        metric_prefix: "data_prepper_error"
+        
+    # Alert rules
+    rules:
+      high_error_rate:
+        condition: "error_rate > 0.05"  # 5% error rate
+        window: "5m"
+        severity: "warning"
+        
+      dlq_size_threshold:
+        condition: "dlq_size > 500mb"
+        window: "1m"
+        severity: "warning"
+        
+      pipeline_failure:
+        condition: "pipeline_status == 'failed'"
+        window: "1m"
+        severity: "critical"
+        
+      circuit_breaker_open:
+        condition: "circuit_breaker_status == 'open'"
+        window: "1m"
+        severity: "critical"
+
+# Error message templates for structured logging
+error_templates:
+  parsing_error:
+    message: "Failed to parse log entry"
+    fields:
+      - "pipeline_name"
+      - "processor_name"
+      - "error_type"
+      - "original_message"
+      - "error_details"
+      - "timestamp"
+      
+  sink_error:
+    message: "Failed to write to sink"
+    fields:
+      - "pipeline_name"
+      - "sink_name"
+      - "error_type"
+      - "retry_attempt"
+      - "error_details"
+      - "timestamp"
+      
+  dlq_error:
+    message: "Document sent to Dead Letter Queue"
+    fields:
+      - "pipeline_name"
+      - "dlq_category"
+      - "dlq_file_path"
+      - "error_reason"
+      - "original_document"
+      - "timestamp"
+      
+  circuit_breaker_error:
+    message: "Circuit breaker activated"
+    fields:
+      - "pipeline_name"
+      - "failure_count"
+      - "failure_rate"
+      - "circuit_state"
+      - "timestamp"

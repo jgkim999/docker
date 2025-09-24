@@ -1,0 +1,196 @@
+groups:
+  - name: data-prepper-alerts
+    rules:
+      # Service availability alerts
+      - alert: DataPrepperDown
+        expr: up{job="data-prepper"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: data-prepper
+          component: availability
+        annotations:
+          summary: "Data Prepper 서비스가 다운되었습니다"
+          description: "Data Prepper 서비스가 {{ $labels.instance }}에서 1분 이상 응답하지 않습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/troubleshooting.md"
+
+      # High error rate alerts
+      - alert: DataPrepperHighErrorRate
+        expr: rate(dataprepper_records_errors_total{job="data-prepper"}[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: data-prepper
+          component: processing
+        annotations:
+          summary: "Data Prepper 높은 오류율 감지"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}에서 초당 {{ $value }}개의 오류가 발생하고 있습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/troubleshooting.md#error-handling"
+
+      - alert: DataPrepperCriticalErrorRate
+        expr: rate(dataprepper_records_errors_total{job="data-prepper"}[5m]) > 50
+        for: 1m
+        labels:
+          severity: critical
+          service: data-prepper
+          component: processing
+        annotations:
+          summary: "Data Prepper 심각한 오류율 감지"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}에서 초당 {{ $value }}개의 심각한 오류가 발생하고 있습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/troubleshooting.md#error-handling"
+
+      # Processing latency alerts
+      - alert: DataPrepperHighLatency
+        expr: histogram_quantile(0.95, rate(dataprepper_processing_time_seconds_bucket{job="data-prepper"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: data-prepper
+          component: performance
+        annotations:
+          summary: "Data Prepper 높은 처리 지연시간"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}의 95th percentile 처리 시간이 {{ $value }}초로 1초를 초과했습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/performance-tuning.md"
+
+      - alert: DataPrepperCriticalLatency
+        expr: histogram_quantile(0.95, rate(dataprepper_processing_time_seconds_bucket{job="data-prepper"}[5m])) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: data-prepper
+          component: performance
+        annotations:
+          summary: "Data Prepper 심각한 처리 지연시간"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}의 95th percentile 처리 시간이 {{ $value }}초로 5초를 초과했습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/performance-tuning.md"
+
+      # Memory usage alerts
+      - alert: DataPrepperHighMemoryUsage
+        expr: (jvm_memory_used_bytes{job="data-prepper", area="heap"} / jvm_memory_max_bytes{job="data-prepper", area="heap"}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: data-prepper
+          component: resources
+        annotations:
+          summary: "Data Prepper 높은 메모리 사용률"
+          description: "Data Prepper JVM 힙 메모리 사용률이 {{ $value }}%로 80%를 초과했습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/performance-tuning.md#memory-tuning"
+
+      - alert: DataPrepperCriticalMemoryUsage
+        expr: (jvm_memory_used_bytes{job="data-prepper", area="heap"} / jvm_memory_max_bytes{job="data-prepper", area="heap"}) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          service: data-prepper
+          component: resources
+        annotations:
+          summary: "Data Prepper 심각한 메모리 사용률"
+          description: "Data Prepper JVM 힙 메모리 사용률이 {{ $value }}%로 95%를 초과했습니다. OutOfMemoryError 위험이 있습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/performance-tuning.md#memory-tuning"
+
+      # Processing throughput alerts
+      - alert: DataPrepperLowThroughput
+        expr: rate(dataprepper_records_out_total{job="data-prepper"}[5m]) < 10
+        for: 10m
+        labels:
+          severity: warning
+          service: data-prepper
+          component: performance
+        annotations:
+          summary: "Data Prepper 낮은 처리량"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}의 처리량이 {{ $value }} records/sec로 10분간 10 records/sec 미만입니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/performance-tuning.md"
+
+      - alert: DataPrepperNoThroughput
+        expr: rate(dataprepper_records_out_total{job="data-prepper"}[5m]) == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: data-prepper
+          component: processing
+        annotations:
+          summary: "Data Prepper 처리량 없음"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}에서 5분간 레코드 처리가 없습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/troubleshooting.md"
+
+      # OpenSearch sink alerts
+      - alert: DataPrepperOpenSearchErrors
+        expr: rate(dataprepper_opensearch_documents_errors_total{job="data-prepper"}[5m]) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: data-prepper
+          component: opensearch-sink
+        annotations:
+          summary: "Data Prepper OpenSearch 인덱싱 오류"
+          description: "Data Prepper에서 OpenSearch로의 문서 인덱싱 중 초당 {{ $value }}개의 오류가 발생하고 있습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/sinks/opensearch.md#troubleshooting"
+
+      - alert: DataPrepperOpenSearchHighErrors
+        expr: rate(dataprepper_opensearch_documents_errors_total{job="data-prepper"}[5m]) > 20
+        for: 1m
+        labels:
+          severity: critical
+          service: data-prepper
+          component: opensearch-sink
+        annotations:
+          summary: "Data Prepper OpenSearch 심각한 인덱싱 오류"
+          description: "Data Prepper에서 OpenSearch로의 문서 인덱싱 중 초당 {{ $value }}개의 심각한 오류가 발생하고 있습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/sinks/opensearch.md#troubleshooting"
+
+      # Buffer/queue alerts
+      - alert: DataPrepperHighBufferUsage
+        expr: dataprepper_records_in_flight{job="data-prepper"} > 5000
+        for: 5m
+        labels:
+          severity: warning
+          service: data-prepper
+          component: buffer
+        annotations:
+          summary: "Data Prepper 높은 버퍼 사용량"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}에서 처리 중인 레코드가 {{ $value }}개로 5000개를 초과했습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/performance-tuning.md#buffer-tuning"
+
+      - alert: DataPrepperCriticalBufferUsage
+        expr: dataprepper_records_in_flight{job="data-prepper"} > 10000
+        for: 2m
+        labels:
+          severity: critical
+          service: data-prepper
+          component: buffer
+        annotations:
+          summary: "Data Prepper 심각한 버퍼 사용량"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}에서 처리 중인 레코드가 {{ $value }}개로 10000개를 초과했습니다. 백프레셰 위험이 있습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/performance-tuning.md#buffer-tuning"
+
+      # Dead Letter Queue alerts
+      - alert: DataPrepperDLQActivity
+        expr: increase(dataprepper_dlq_records_total{job="data-prepper"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: data-prepper
+          component: dlq
+        annotations:
+          summary: "Data Prepper Dead Letter Queue 활동 감지"
+          description: "Data Prepper 파이프라인 {{ $labels.pipeline }}에서 지난 5분간 {{ $value }}개의 레코드가 DLQ로 전송되었습니다."
+          runbook_url: "https://github.com/opensearch-project/data-prepper/blob/main/docs/troubleshooting.md#dead-letter-queue"
+
+  - name: data-prepper-health-checks
+    rules:
+      # Health check rules for composite alerts
+      - record: dataprepper:error_rate_5m
+        expr: rate(dataprepper_records_errors_total{job="data-prepper"}[5m])
+
+      - record: dataprepper:success_rate_5m
+        expr: rate(dataprepper_records_out_total{job="data-prepper"}[5m]) / (rate(dataprepper_records_in_total{job="data-prepper"}[5m]) + 0.001) * 100
+
+      - record: dataprepper:latency_p95_5m
+        expr: histogram_quantile(0.95, rate(dataprepper_processing_time_seconds_bucket{job="data-prepper"}[5m]))
+
+      - record: dataprepper:memory_usage_percent
+        expr: (jvm_memory_used_bytes{job="data-prepper", area="heap"} / jvm_memory_max_bytes{job="data-prepper", area="heap"}) * 100
+
+      - record: dataprepper:throughput_5m
+        expr: rate(dataprepper_records_out_total{job="data-prepper"}[5m])

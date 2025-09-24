@@ -2,6 +2,11 @@ global:
   scrape_interval: 15s
   scrape_timeout: 10s
   evaluation_interval: 15s
+
+# Load alerting rules
+rule_files:
+  - "data-prepper-alerts.yml"
+
 alerting:
   alertmanagers:
   - static_configs:
@@ -79,3 +84,21 @@ scrape_configs:
   static_configs:
   - targets:
     - redis_exporter:9121
+- job_name: data-prepper
+  honor_timestamps: true
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - data-prepper:9600
+  metric_relabel_configs:
+  - source_labels: [__name__]
+    regex: 'dataprepper_.*'
+    target_label: component
+    replacement: 'data-prepper'
+  - source_labels: [pipeline]
+    target_label: data_prepper_pipeline
+  - source_labels: [processor]
+    target_label: data_prepper_processor
