@@ -149,7 +149,7 @@ services:
     ports:
       - "21892:21892" # OTLP gRPC receiver for logs
       - "4900:4900"   # HTTP API and health check endpoint
-      - "9600:9600"   # Prometheus metrics endpoint
+      - "9601:9600"   # Prometheus metrics endpoint
     volumes:
       - ./data-prepper.yaml:/usr/share/data-prepper/pipelines/data-prepper.yaml
       - ./data-prepper-error-config.yaml:/usr/share/data-prepper/config/error-config.yaml

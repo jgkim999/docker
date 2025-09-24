@@ -92,7 +92,7 @@ scrape_configs:
   scheme: http
   static_configs:
   - targets:
-    - data-prepper:9600
+    - data-prepper:9601
   metric_relabel_configs:
   - source_labels: [__name__]
     regex: 'dataprepper_.*'
