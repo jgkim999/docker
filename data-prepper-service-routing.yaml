@@ -1,0 +1,120 @@
+# Data Prepper configuration with service-based index routing
+
+# Main log processing pipeline
+log-pipeline:
+  source:
+    otel_logs_source:
+      port: 21892
+      ssl: false
+
+  route:
+    # Route for demo-web service
+    - when: '/resource/attributes/service.name == "demo-web"'
+      routes:
+        - demo-web-pipeline
+
+    # Route for demo-consumer service
+    - when: '/resource/attributes/service.name == "demo-consumer"'
+      routes:
+        - demo-consumer-pipeline
+
+    # Default route for unknown services
+    - default_route:
+        - default-log-pipeline
+
+# Demo-web service specific pipeline
+demo-web-pipeline:
+  source:
+    pipeline:
+      name: "log-pipeline"
+
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "logs-demo-web-%{yyyy.MM.dd}"
+
+# Demo-consumer service specific pipeline
+demo-consumer-pipeline:
+  source:
+    pipeline:
+      name: "log-pipeline"
+
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "logs-demo-consumer-%{yyyy.MM.dd}"
+
+# Default pipeline for unknown services
+default-log-pipeline:
+  source:
+    pipeline:
+      name: "log-pipeline"
+
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "logs-unknown-%{yyyy.MM.dd}"
+
+# Trace processing pipeline (with similar routing)
+trace-pipeline:
+  source:
+    otel_trace_source:
+      port: 21890
+      ssl: false
+
+  processor:
+    - otel_traces: {}
+
+  route:
+    # Route for demo-web service traces
+    - when: '/resource/attributes/service.name == "demo-web"'
+      routes:
+        - demo-web-trace-pipeline
+
+    # Route for demo-consumer service traces
+    - when: '/resource/attributes/service.name == "demo-consumer"'
+      routes:
+        - demo-consumer-trace-pipeline
+
+    # Default route for unknown services
+    - default_route:
+        - default-trace-pipeline
+
+# Demo-web trace pipeline
+demo-web-trace-pipeline:
+  source:
+    pipeline:
+      name: "trace-pipeline"
+
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "traces-demo-web-%{yyyy.MM.dd}"
+
+# Demo-consumer trace pipeline
+demo-consumer-trace-pipeline:
+  source:
+    pipeline:
+      name: "trace-pipeline"
+
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "traces-demo-consumer-%{yyyy.MM.dd}"
+
+# Default trace pipeline
+default-trace-pipeline:
+  source:
+    pipeline:
+      name: "trace-pipeline"
+
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "traces-unknown-%{yyyy.MM.dd}"

@@ -4,11 +4,19 @@ log-pipeline:
       port: 21892
       ssl: false
 
+  processor:
+    # Add service name from resource attributes to the document
+    - mutate:
+        add_entries:
+          - key: "service_name"
+            value: "%{/resource/attributes/service.name}"
+        tags_on_failure: ["_mutate_failure"]
+
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
-        index: "logs-%{yyyy.MM.dd}"
+        index: "logs-%{service_name}-%{yyyy.MM.dd}"
 
 trace-pipeline:
   source:
