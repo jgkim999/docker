@@ -1,65 +1,72 @@
-# Data Prepper configuration with service-based index routing
+# Service-based routing with separate pipelines for each service
 
-# Main log processing pipeline
-log-pipeline:
+# Entry pipeline for logs - extracts service name and routes
+log-entry:
   source:
     otel_logs_source:
       port: 21892
       ssl: false
 
   route:
-    # Route for demo-web service
-    - when: '/resource/attributes/service.name == "demo-web"'
+    - when: 'serviceName == "demo-web"'
       routes:
-        - demo-web-pipeline
-
-    # Route for demo-consumer service
-    - when: '/resource/attributes/service.name == "demo-consumer"'
+        - log-demo-web
+    - when: 'serviceName == "demo-consumer"'
       routes:
-        - demo-consumer-pipeline
-
-    # Default route for unknown services
+        - log-demo-consumer
+    - when: 'serviceName == "test-service"'
+      routes:
+        - log-test-service
     - default_route:
-        - default-log-pipeline
+        routes:
+          - log-unknown
 
-# Demo-web service specific pipeline
-demo-web-pipeline:
+# Demo-web logs pipeline
+log-demo-web:
   source:
     pipeline:
-      name: "log-pipeline"
-
+      name: "log-entry"
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "logs-demo-web-%{yyyy.MM.dd}"
 
-# Demo-consumer service specific pipeline
-demo-consumer-pipeline:
+# Demo-consumer logs pipeline
+log-demo-consumer:
   source:
     pipeline:
-      name: "log-pipeline"
-
+      name: "log-entry"
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "logs-demo-consumer-%{yyyy.MM.dd}"
 
-# Default pipeline for unknown services
-default-log-pipeline:
+# Test-service logs pipeline
+log-test-service:
   source:
     pipeline:
-      name: "log-pipeline"
+      name: "log-entry"
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "logs-test-service-%{yyyy.MM.dd}"
 
+# Unknown service logs pipeline
+log-unknown:
+  source:
+    pipeline:
+      name: "log-entry"
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "logs-unknown-%{yyyy.MM.dd}"
 
-# Trace processing pipeline (with similar routing)
-trace-pipeline:
+# Entry pipeline for traces
+trace-entry:
   source:
     otel_trace_source:
       port: 21890
@@ -69,50 +76,57 @@ trace-pipeline:
     - otel_traces: {}
 
   route:
-    # Route for demo-web service traces
-    - when: '/resource/attributes/service.name == "demo-web"'
+    - when: 'serviceName == "demo-web"'
       routes:
-        - demo-web-trace-pipeline
-
-    # Route for demo-consumer service traces
-    - when: '/resource/attributes/service.name == "demo-consumer"'
+        - trace-demo-web
+    - when: 'serviceName == "demo-consumer"'
       routes:
-        - demo-consumer-trace-pipeline
-
-    # Default route for unknown services
+        - trace-demo-consumer
+    - when: 'serviceName == "test-service"'
+      routes:
+        - trace-test-service
     - default_route:
-        - default-trace-pipeline
+        routes:
+          - trace-unknown
 
-# Demo-web trace pipeline
-demo-web-trace-pipeline:
+# Demo-web traces pipeline
+trace-demo-web:
   source:
     pipeline:
-      name: "trace-pipeline"
-
+      name: "trace-entry"
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "traces-demo-web-%{yyyy.MM.dd}"
 
-# Demo-consumer trace pipeline
-demo-consumer-trace-pipeline:
+# Demo-consumer traces pipeline
+trace-demo-consumer:
   source:
     pipeline:
-      name: "trace-pipeline"
-
+      name: "trace-entry"
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "traces-demo-consumer-%{yyyy.MM.dd}"
 
-# Default trace pipeline
-default-trace-pipeline:
+# Test-service traces pipeline
+trace-test-service:
   source:
     pipeline:
-      name: "trace-pipeline"
+      name: "trace-entry"
+  sink:
+    - opensearch:
+        hosts:
+          - "http://opensearch:9200"
+        index: "traces-test-service-%{yyyy.MM.dd}"
 
+# Unknown service traces pipeline
+trace-unknown:
+  source:
+    pipeline:
+      name: "trace-entry"
   sink:
     - opensearch:
         hosts:
