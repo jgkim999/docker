@@ -34,7 +34,7 @@ service-map-pipeline:
       name: "trace-pipeline"
 
   processor:
-    - service_map:
+    - service_map_stateful:
         window_duration: 180s
 
   sink:
