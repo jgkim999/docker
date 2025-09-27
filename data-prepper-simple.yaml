@@ -26,15 +26,3 @@ trace-pipeline:
           - "http://opensearch:9200"
         index: "otel-v1-apm-span"
         insecure: true
-
-service-map-pipeline:
-  source:
-    pipeline:
-      name: "trace-pipeline"
-
-  sink:
-    - opensearch:
-        hosts:
-          - "http://opensearch:9200"
-        index: "otel-v1-apm-service-map"
-        insecure: true
