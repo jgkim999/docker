@@ -8,9 +8,8 @@ log-pipeline:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
-        index: "logs-%{serviceName}"
-        # 서비스 별로 인덱스 생성
-        insecure: true
+        index: "logs-${serviceName}"
+        # 서비스 별로 인덱스 생성 (serviceName 변수 사용)
 
 trace-pipeline:
   source:
@@ -38,7 +37,7 @@ service-map-pipeline:
 
   processor:
     - service_map_stateful:
-        window_duration: "PT3M"
+        window_duration: 180s
 
   sink:
     - opensearch:
