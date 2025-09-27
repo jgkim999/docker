@@ -20,6 +20,7 @@ trace-pipeline:
   processor:
     - otel_traces:
     - service_map:
+        file_path: "/usr/share/data-prepper/data/service-map"
 
   sink:
     - opensearch:
