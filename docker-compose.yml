@@ -193,7 +193,7 @@ services:
   portainer:
     # Portainer is a lightweight management UI which allows you to easily manage your Docker containers
     # https://hub.docker.com/r/portainer/portainer-ce
-    image: portainer/portainer-ce:2.33.1
+    image: portainer/portainer-ce:2.33.2
     container_name: portainer
     restart: unless-stopped
     ports:
