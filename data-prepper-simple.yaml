@@ -19,17 +19,13 @@ trace-pipeline:
 
   processor:
     - otel_traces:
-    - service_map:
-        file_path: "/usr/share/data-prepper/data/service-map"
-
+    
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "otel-v1-apm-span"
         insecure: true
-    - pipeline:
-        name: "service-map-pipeline"
 
 service-map-pipeline:
   source:
