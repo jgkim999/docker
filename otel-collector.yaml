@@ -21,9 +21,10 @@ processors:
     send_batch_size: 1024
 
 exporters:
+  # Loki for logs
   otlphttp:
     endpoint: http://loki:3100/otlp
-  # Data Prepper for logs and traces
+  # Data Prepper for logs
   otlp/dataprepper-logs:
     endpoint: data-prepper:21892
     tls:
@@ -37,7 +38,7 @@ exporters:
       initial_interval: 1s
       max_interval: 30s
       max_elapsed_time: 300s
-
+  # Data Prepper for traces
   otlp/dataprepper-traces:
     endpoint: data-prepper:21890
     tls:
@@ -53,16 +54,17 @@ exporters:
       max_elapsed_time: 300s
 
   # Backup exporters for redundancy
+  # Jaeger for traces
   otlp/jaeger:
     endpoint: jaeger:4317
     tls:
       insecure: true
-
+  # Tempo for traces
   otlphttp/tempo:
     endpoint: http://tempo:4318
     tls:
       insecure: true
-
+  # Prometheus Remote Write for metrics
   prometheusremotewrite:
     endpoint: http://prometheus:9090/api/v1/write
     tls:

@@ -24,4 +24,4 @@ trace-pipeline:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
-        index: "otel-v1-apm-span"
+        index: "otel-v1-apm-span-%{yyyy.MM.dd}"
