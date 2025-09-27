@@ -3,28 +3,35 @@ log-pipeline:
     otel_logs_source:
       port: 21892
       ssl: false
+      health_check_service: true
 
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
-        index: "logs-${serviceName}"
-        # 서비스 별로 인덱스 생성 (serviceName 변수 사용)
+        index: "logs-${getMetadata(\"service.name\")}"
+        # 서비스 별로 인덱스 생성 (service.name 메타데이터 사용)
+        insecure: true
+        verify_ssl: false
 
 trace-pipeline:
   source:
     otel_trace_source:
       port: 21890
       ssl: false
+      health_check_service: true
 
   processor:
-    - otel_traces: {}
+    - otel_traces:
 
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "otel-v1-apm-span"
+        index_type: trace-analytics-raw
+        insecure: true
+        verify_ssl: false
     - pipeline:
         name: "service-map-pipeline"
 
@@ -35,7 +42,6 @@ service-map-pipeline:
 
   processor:
     - service_map_stateful:
-        # Data Prepper v2에서는 window_duration 대신 다음 설정 사용
         window_duration: "PT3M"  # ISO 8601 duration format (3 minutes)
 
   sink:
@@ -44,3 +50,5 @@ service-map-pipeline:
           - "http://opensearch:9200"
         index: "otel-v1-apm-service-map"
         index_type: service-map
+        insecure: true
+        verify_ssl: false
