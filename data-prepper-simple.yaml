@@ -25,24 +25,4 @@ trace-pipeline:
         hosts:
           - "http://opensearch:9200"
         index: "otel-v1-apm-span"
-        index_type: trace-analytics-raw
-        insecure: true
-    - pipeline:
-        name: "service-map-pipeline"
-
-service-map-pipeline:
-  source:
-    pipeline:
-      name: "trace-pipeline"
-
-  processor:
-    - service_map_stateful:
-        window_duration: 180s
-
-  sink:
-    - opensearch:
-        hosts:
-          - "http://opensearch:9200"
-        index: "otel-v1-apm-service-map"
-        index_type: service-map
         insecure: true
