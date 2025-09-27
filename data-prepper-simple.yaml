@@ -35,10 +35,12 @@ service-map-pipeline:
 
   processor:
     - service_map_stateful:
-        window_duration: 180s
+        # Data Prepper v2에서는 window_duration 대신 다음 설정 사용
+        window_duration: "PT3M"  # ISO 8601 duration format (3 minutes)
 
   sink:
     - opensearch:
         hosts:
           - "http://opensearch:9200"
         index: "otel-v1-apm-service-map"
+        index_type: service-map
