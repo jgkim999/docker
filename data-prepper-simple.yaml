@@ -19,8 +19,6 @@ trace-pipeline:
 
   processor:
     - otel_traces:
-    - otel_traces_group:
-        hosts: [ "http://opensearch:9200" ]
     
   sink:
     - opensearch:
@@ -28,7 +26,7 @@ trace-pipeline:
           - "http://opensearch:9200"
         index: "otel-v1-apm-span"
         insecure: true
-        
+
 service-map-pipeline:
   workers: 2
   delay: "100"
