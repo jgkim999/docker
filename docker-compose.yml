@@ -2,7 +2,8 @@ services:
   cadvisor:
     # cAdvisor is a tool for monitoring container performance
     # https://console.cloud.google.com/artifacts/docker/cadvisor/us/gcr.io/cadvisor?pli=1&invt=Ab3vrA&inv=1
-    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    #platform: linux/arm64
     container_name: cadvisor
     restart: unless-stopped
     ports:
@@ -23,7 +24,8 @@ services:
   grafana:
     # Grafana is an open-source platform for monitoring and observability
     # https://hub.docker.com/r/grafana/grafana
-    image: grafana/grafana:12.1.0
+    image: grafana/grafana:12.2.0
+    #platform: linux/arm64
     container_name: grafana
     restart: unless-stopped
     user: ":"
@@ -43,6 +45,7 @@ services:
     # Jaeger is an open-source, end-to-end distributed tracing system
     # https://hub.docker.com/r/jaegertracing/jaeger
     image: "jaegertracing/jaeger:2.10.0"
+    #platform: linux/arm64
     container_name: jaeger
     restart: unless-stopped
     ports:
@@ -54,7 +57,8 @@ services:
   loki:
     # Loki is a log aggregation system designed to work seamlessly with Grafana
     # https://hub.docker.com/r/grafana/loki
-    image: grafana/loki:3.5
+    image: grafana/loki:3.5.0
+    #platform: linux/arm64
     container_name: loki
     restart: unless-stopped
     env_file:
@@ -77,6 +81,7 @@ services:
     # MySQL is a popular open-source relational database management system
     # https://hub.docker.com/_/mysql
     image: mysql:9.4.0
+    #platform: linux/arm64
     container_name: mysql
     restart: unless-stopped
     ports:
@@ -93,6 +98,7 @@ services:
     # Node Exporter is a Prometheus exporter for hardware and OS metrics
     # https://hub.docker.com/r/bitnami/node-exporter
     image: bitnami/node-exporter:1.9.1
+    #platform: linux/arm64
     container_name: node-exporter
     restart: unless-stopped
     ports:
@@ -102,6 +108,7 @@ services:
   opensearch:
     # https://hub.docker.com/r/opensearchproject/opensearch
     image: opensearchproject/opensearch:3.2.0
+    #platform: linux/arm64
     container_name: opensearch-node1
     restart: unless-stopped
     user: "1000:1000" # sudo chown -R username:group directory
@@ -124,6 +131,7 @@ services:
     # https://hub.docker.com/r/opensearchproject/opensearch-dashboards
     # Make sure the version of opensearch-dashboards matches the version of opensearch installed on other nodes
     image: opensearchproject/opensearch-dashboards:3.2.0 
+    #platform: linux/arm64
     container_name: opensearch-dashboards
     restart: unless-stopped
     ports:
@@ -141,7 +149,8 @@ services:
   data-prepper:
     # OpenSearch Data Prepper is a server-side data collector for filtering, enriching, transforming, normalizing, and aggregating data
     # https://hub.docker.com/r/opensearchproject/data-prepper
-    image: opensearchproject/data-prepper:2
+    image: opensearchproject/data-prepper:2.12.1
+    #platform: linux/amd64  # Data Prepper는 ARM64를 지원하지 않으므로 에뮬레이션 사용
     container_name: data-prepper
     restart: unless-stopped
     ports:
@@ -169,6 +178,7 @@ services:
     # OpenTelemetry Collector is a vendor-agnostic agent for collecting telemetry data
     # https://hub.docker.com/r/otel/opentelemetry-collector-contrib
     image: otel/opentelemetry-collector-contrib:0.135.0
+    #platform: linux/arm64
     container_name: otel-collector
     restart: unless-stopped
     command: [ "--config=/etc/otel-collector.yaml" ]
@@ -194,6 +204,7 @@ services:
     # Portainer is a lightweight management UI which allows you to easily manage your Docker containers
     # https://hub.docker.com/r/portainer/portainer-ce
     image: portainer/portainer-ce:2.33.2
+    #platform: linux/arm64
     container_name: portainer
     restart: unless-stopped
     ports:
@@ -207,6 +218,7 @@ services:
     # PostgreSQL is a powerful, open source object-relational database system
     # https://hub.docker.com/_/postgres
     image: jgkim999/postgres-ko:17.5
+    #platform: linux/amd64  # 커스텀 이미지이므로 AMD64로 설정
     container_name: postgres
     restart: unless-stopped
     ports:
@@ -219,6 +231,7 @@ services:
     # Prometheus is an open-source systems monitoring and alerting toolkit
     # https://hub.docker.com/r/bitnami/prometheus
     image: bitnami/prometheus:3.5.0
+    #platform: linux/arm64
     container_name: prometheus
     restart: unless-stopped
     user: ":"
@@ -245,6 +258,7 @@ services:
     # RabbitMQ is a messaging broker that enables applications to communicate with each other
     # https://hub.docker.com/_/rabbitmq
     image: rabbitmq:4.1.4-management
+    #platform: linux/arm64
     container_name: rabbitmq
     hostname: rabbitmq-server  # 고정 호스트네임 추가
     restart: unless-stopped
@@ -261,6 +275,7 @@ services:
     # Valkey is a Redis-compatible database with enhanced features
     # https://hub.docker.com/r/valkey/valkey
     image: valkey/valkey:8.1.3
+    #platform: linux/arm64
     container_name: valkey
     restart: unless-stopped
     env_file:
@@ -275,7 +290,8 @@ services:
   redis-exporter:
     # Redis Exporter is a Prometheus exporter for Redis metrics
     # https://hub.docker.com/r/bitnami/redis-exporter
-    image: bitnami/redis-exporter:1.74.0
+    image: bitnami/redis-exporter:1.75.0
+    #platform: linux/arm64
     container_name: redis_exporter
     restart: unless-stopped
     ports:
@@ -288,7 +304,8 @@ services:
     # Tempo is a distributed tracing backend that integrates with Grafana
     # https://hub.docker.com/r/grafana/tempo
     container_name: tempo
-    image: grafana/tempo:main-2f3f970 # 2025-07-26
+    image: grafana/tempo:2.7.0
+    #platform: linux/arm64
     restart: unless-stopped
     env_file:
       - .env.tempo
